@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - Client List</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      .password-wrap { position: relative; }
+      .password-wrap input { padding-right: 44px; }
+      .toggle-password-btn { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); border: 0; background: transparent; color: #64748b; cursor: pointer; }
+      .form-section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e5e7eb; }
+      .form-section h4 { margin: 0 0 15px 0; font-weight: 600; }
+      .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+      .form-group { display: flex; flex-direction: column; }
+      .form-group label { font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #64748b; }
+      .form-group input, .form-group select { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+      .form-group input:focus, .form-group select:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
+      .form-group input:disabled { background: #f3f4f6; cursor: no-drop; }
+      .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; align-items: center; justify-content: center; }
+      .modal-overlay.active { display: flex; }
+      .modal-content { background: white; border-radius: 8px; padding: 30px; max-width: 1000px; width: 90%; max-height: 90vh; overflow-y: auto; }
+      .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; }
+      .modal-close { border: none; background: none; font-size: 24px; cursor: pointer; color: #6b7280; }
+      .data-table-container { overflow-x: auto; margin-top: 20px; }
+      .client-table { width: 100%; border-collapse: collapse; }
+      .client-table th { background: #f3f4f6; padding: 12px; text-align: left; font-weight: 600; font-size: 12px; border-bottom: 2px solid #d1d5db; }
+      .client-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+      .client-table tr:hover { background: #f9fafb; }
+      .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+      .status-active { background: #dcfce7; color: #166534; }
+      .status-disconnected { background: #fee2e2; color: #991b1b; }
+      .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.3s; }
+      .btn-sm { padding: 6px 10px; font-size: 12px; }
+      .btn-navy { background: #0f1d3f; color: white; }
+      .btn-navy:hover { background: #1a2a4d; }
+      .btn-danger { background: #dc2626; color: white; }
+      .btn-danger:hover { background: #991b1b; }
+      .btn-primary { background: #3b82f6; color: white; }
+      .btn-primary:hover { background: #1d4ed8; }
+      @media print { .top-actions, .filters-container, .filter-section, .modal-overlay { display: none; } }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+    <div class="main-content">
+      <div class="page-content">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-list"></i> Client List <span class="text-muted" style="font-size: 12px; margin-left: 10px; font-weight: normal;">View All Clients</span></div>
+          </div>
+
+          <!-- Top Action Buttons -->
+          <div class="top-actions" style="display: flex; justify-content: flex-end; gap: 5px; flex-wrap: wrap; margin-bottom: 20px;">
+            <button class="btn btn-navy" id="excelBtn"><i class="fa-solid fa-file-excel"></i> Excel</button>
+            <button class="btn btn-navy" id="pdfBtn"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+            <button class="btn btn-primary" id="addNewClientBtn"><i class="fa-solid fa-plus"></i> Add Client</button>
+          </div>
+
+          <!-- Filters -->
+          <div class="filters-container" style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div class="filter-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+              <div style="display: flex; flex-direction: column;">
+                <label style="font-size: 12px; font-weight: 600; margin-bottom: 5px;">Zone</label>
+                <select id="zoneFilter" style="padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                  <option value="">All Zones</option>
+                </select>
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <label style="font-size: 12px; font-weight: 600; margin-bottom: 5px;">Package</label>
+                <select id="packageFilter" style="padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                  <option value="">All Packages</option>
+                </select>
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <label style="font-size: 12px; font-weight: 600; margin-bottom: 5px;">Status</label>
+                <select id="statusFilter" style="padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                  <option value="">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="disconnected">Disconnected</option>
+                  <option value="paused">Paused</option>
+                </select>
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <label style="font-size: 12px; font-weight: 600; margin-bottom: 5px;">Search</label>
+                <input type="text" id="clientSearchInput" placeholder="Name, phone, code..." style="padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Table -->
+          <div class="data-table-container">
+            <table class="client-table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" /></th>
+                  <th>Code</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>NID</th>
+                  <th>Birth Date</th>
+                  <th>Address</th>
+                  <th>Area</th>
+                  <th>City</th>
+                  <th>Postal Code</th>
+                  <th>Package</th>
+                  <th>Conn. Type</th>
+                  <th>Install Date</th>
+                  <th>Billing Date</th>
+                  <th>Email</th>
+                  <th>MAC Address</th>
+                  <th>Router IP</th>
+                  <th>Referral</th>
+                  <th>Emergency</th>
+                  <th>Notes</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="clientTableBody">
+                <tr><td colspan="24" style="text-align: center; padding: 20px; color: #6b7280;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Client Modal -->
+    <div id="editClientModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Client</h2>
+          <button class="modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+
+        <form id="editClientForm" style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Personal Information -->
+          <div class="form-section">
+            <h4><i class="fa-solid fa-user"></i> Personal Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" id="edit-first-name" required />
+              </div>
+              <div class="form-group">
+                <label>Last Name *</label>
+                <input type="text" id="edit-last-name" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone *</label>
+                <input type="tel" id="edit-phone" required />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="edit-email" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>NID / Passport</label>
+                <input type="text" id="edit-nid" />
+              </div>
+              <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" id="edit-birth-date" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Address Information -->
+          <div class="form-section">
+            <h4><i class="fa-solid fa-location-dot"></i> Address Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Street Address *</label>
+                <input type="text" id="edit-address" required />
+              </div>
+              <div class="form-group">
+                <label>Area / District *</label>
+                <input type="text" id="edit-area" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>City *</label>
+                <input type="text" id="edit-city" required />
+              </div>
+              <div class="form-group">
+                <label>Postal Code</label>
+                <input type="text" id="edit-postal-code" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Information -->
+          <div class="form-section">
+            <h4><i class="fa-solid fa-wifi"></i> Service Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Service Package *</label>
+                <select id="edit-package" required>
+                  <option value="">Select Package</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Installation Date *</label>
+                <input type="date" id="edit-installation-date" required />
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection Settings -->
+          <div class="form-section">
+            <h4><i class="fa-solid fa-plug"></i> Connection Settings</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Connection Type *</label>
+                <select id="edit-connection-type" required>
+                  <option value="">Select Type</option>
+                  <option value="fiber">Fiber Optic</option>
+                  <option value="wireless">Wireless</option>
+                  <option value="copper">Copper</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Technical Information -->
+          <div class="form-section">
+            <h4><i class="fa-solid fa-network-wired"></i> Technical Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Connection Username</label>
+                <input type="text" id="edit-username" disabled />
+              </div>
+              <div class="form-group">
+                <label>Connection Mail</label>
+                <input type="email" id="edit-connection-mail" disabled />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Connection Password</label>
+                <div class="password-wrap">
+                  <input type="password" id="edit-connection-password" placeholder="Leave blank to keep current" />
+                  <button type="button" class="toggle-password-btn" id="toggleEditPassword" aria-label="Show password">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>ONU MAC Address</label>
+                <input type="text" id="edit-onu-mac" />
+              </div>
+              <div class="form-group">
+                <label>Router IP Address</label>
+                <input type="text" id="edit-router-ip" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Information -->
+          <div class="form-section">
+            <h4><i class="fa-solid fa-circle-info"></i> Additional Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Monthly Billing Date</label>
+                <select id="edit-payment-cycle-date">
+                  <option value="">Select Date</option>
+                  <option value="1">1st of month</option>
+                  <option value="5">5th of month</option>
+                  <option value="10">10th of month</option>
+                  <option value="15">15th of month</option>
+                  <option value="20">20th of month</option>
+                  <option value="25">25th of month</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Referred By</label>
+                <input type="text" id="edit-referral-name" placeholder="Enter referral name" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Emergency Contact</label>
+                <input type="text" id="edit-emergency-contact" placeholder="Enter emergency contact number" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Notes</label>
+              <textarea id="edit-notes" rows="3" placeholder="Additional notes about the client..."></textarea>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-navy" onclick="closeEditModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Client</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      let allClients = [];
+      let currentEditingClientId = null;
+      let canEditClients = false;
+      let canDeleteClients = false;
+      let availablePackages = [];
+
+      const tableBody = document.getElementById('clientTableBody');
+      const searchInput = document.getElementById('clientSearchInput');
+      const zoneFilter = document.getElementById('zoneFilter');
+      const packageFilter = document.getElementById('packageFilter');
+      const statusFilter = document.getElementById('statusFilter');
+      const addNewClientBtn = document.getElementById('addNewClientBtn');
+      const excelBtn = document.getElementById('excelBtn');
+      const pdfBtn = document.getElementById('pdfBtn');
+      const editForm = document.getElementById('editClientForm');
+      const editModal = document.getElementById('editClientModal');
+      const toggleEditPassword = document.getElementById('toggleEditPassword');
+      const editPackageSelect = document.getElementById('edit-package');
+
+      addNewClientBtn.addEventListener('click', () => window.location.href = 'add_new_client.html');
+      
+      excelBtn.addEventListener('click', exportToExcel);
+      pdfBtn.addEventListener('click', exportToPDF);
+      searchInput.addEventListener('input', debounce(filterClients, 300));
+      zoneFilter.addEventListener('change', filterClients);
+      packageFilter.addEventListener('change', filterClients);
+      statusFilter.addEventListener('change', filterClients);
+      editForm.addEventListener('submit', updateClient);
+      toggleEditPassword.addEventListener('click', function () {
+        const pwd = document.getElementById('edit-connection-password');
+        const isPassword = pwd.type === 'password';
+        pwd.type = isPassword ? 'text' : 'password';
+        toggleEditPassword.innerHTML = isPassword ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+      });
+
+      async function ensureAuth() {
+        try {
+          const res = await fetch('backend/public/auth/me.php', { credentials: 'same-origin' });
+          if (!res.ok) window.location.href = 'login.html';
+          return res.ok;
+        } catch { window.location.href = 'login.html'; }
+      }
+
+      async function loadClients() {
+        try {
+          const res = await fetch('backend/public/clients/list.php', { credentials: 'same-origin' });
+          const data = await res.json();
+          if (data.ok) {
+            allClients = data.clients;
+            canEditClients = Boolean(data.can_edit);
+            canDeleteClients = Boolean(data.can_delete);
+            populateFilters();
+            renderClients(allClients);
+          } else {
+            tableBody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 20px; color: #dc2626;">${data.message}</td></tr>`;
+          }
+        } catch (error) {
+          tableBody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 20px; color: #dc2626;">Failed to load clients</td></tr>`;
+        }
+      }
+
+      function renderEditPackageOptions(selectedSlug = '') {
+        const preservedSelected = selectedSlug || editPackageSelect.value || '';
+        editPackageSelect.innerHTML = '<option value="">Select Package</option>';
+
+        availablePackages.forEach((pkg) => {
+          const option = document.createElement('option');
+          option.value = pkg.package_slug;
+          option.textContent = pkg.package_label || pkg.package_name || pkg.package_slug;
+          editPackageSelect.appendChild(option);
+        });
+
+        if (preservedSelected) {
+          const hasSelected = availablePackages.some((pkg) => pkg.package_slug === preservedSelected);
+          if (!hasSelected) {
+            const fallback = document.createElement('option');
+            fallback.value = preservedSelected;
+            fallback.textContent = preservedSelected + ' (legacy)';
+            editPackageSelect.appendChild(fallback);
+          }
+          editPackageSelect.value = preservedSelected;
+        }
+      }
+
+      async function loadPackagesFromDb() {
+        try {
+          const res = await fetch('backend/public/clients/packages.php', { credentials: 'same-origin' });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            throw new Error(data.message || 'Failed to load internet packages');
+          }
+
+          availablePackages = Array.isArray(data.packages) ? data.packages : [];
+          renderEditPackageOptions();
+        } catch (error) {
+          console.error('Package load failed:', error);
+          renderEditPackageOptions();
+        }
+      }
+
+      function populateFilters() {
+        const zones = [...new Set(allClients.map(c => c.zone_name))].filter(Boolean).sort();
+        const packages = [...new Set(allClients.map(c => c.package_name))].filter(Boolean).sort();
+        
+        zones.forEach(z => {
+          const opt = document.createElement('option');
+          opt.value = z;
+          opt.textContent = z;
+          zoneFilter.appendChild(opt);
+        });
+
+        packages.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p;
+          opt.textContent = p;
+          packageFilter.appendChild(opt);
+        });
+      }
+
+      function renderClients(clients) {
+        if (clients.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="24" style="text-align: center; padding: 20px; color: #6b7280;">No clients found</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = clients.map(c => {
+          const nameParts = (c.full_name || '').split(' ', 2);
+          const firstName = nameParts[0] || '-';
+          const lastName = nameParts[1] || '-';
+          return `
+          <tr>
+            <td><input type="checkbox" /></td>
+            <td><strong>${c.client_code || '-'}</strong></td>
+            <td>${firstName}</td>
+            <td>${lastName}</td>
+            <td>${c.phone || '-'}</td>
+            <td>${c.email || '-'}</td>
+            <td>${c.nid || '-'}</td>
+            <td>${c.birth_date || '-'}</td>
+            <td>${c.address_line || '-'}</td>
+            <td>${c.ward || '-'}</td>
+            <td>${c.zone_name || '-'}</td>
+            <td>${c.road_no || '-'}</td>
+            <td>${c.package_name || '-'}</td>
+            <td>${c.connection_type || '-'}</td>
+            <td>${c.connection_start_date || '-'}</td>
+            <td>${c.payment_cycle_date ? (c.payment_cycle_date + ' of month') : '-'}</td>
+            <td>${c.connection_email || '-'}</td>
+            <td>${c.onu_mac ? '<code style="font-size: 11px;">' + c.onu_mac + '</code>' : '-'}</td>
+            <td>${c.router_ip || '-'}</td>
+            <td>${c.referral_name || '-'}</td>
+            <td>${c.emergency_contact || '-'}</td>
+            <td>${c.notes ? c.notes.substring(0, 30) + '...' : '-'}</td>
+            <td><span class="status-badge status-${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>
+            <td style="display: flex; gap: 5px;">
+              ${canEditClients ? `<button class="btn btn-sm btn-navy" onclick="openEditModal(${c.id})"><i class="fa-solid fa-edit"></i> Edit</button>` : `<span style="font-size:12px;color:#64748b;">View only</span>`}
+              ${canDeleteClients ? `<button class="btn btn-sm btn-danger" onclick="deleteClient(${c.id})"><i class="fa-solid fa-trash"></i> Delete</button>` : ''}
+            </td>
+          </tr>
+        `;
+        }).join('');
+      }
+
+      function filterClients() {
+        const search = searchInput.value.toLowerCase();
+        const zone = zoneFilter.value;
+        const pkg = packageFilter.value;
+        const status = statusFilter.value;
+
+        const filtered = allClients.filter(c => {
+          const matchSearch = !search || c.full_name?.toLowerCase().includes(search) || c.phone?.includes(search) || c.client_code?.toLowerCase().includes(search);
+          const matchZone = !zone || c.zone_name === zone;
+          const matchPackage = !pkg || c.package_name === pkg;
+          const matchStatus = !status || c.status === status;
+          return matchSearch && matchZone && matchPackage && matchStatus;
+        });
+
+        renderClients(filtered);
+      }
+
+      async function openEditModal(clientId) {
+        if (!canEditClients) {
+          alert('You do not have permission to edit clients');
+          return;
+        }
+        try {
+          const res = await fetch(`backend/public/clients/get.php?id=${clientId}`, { credentials: 'same-origin' });
+          const data = await res.json();
+          if (data.ok) {
+            const client = data.client;
+            currentEditingClientId = client.id;
+            document.getElementById('edit-first-name').value = client.first_name;
+            document.getElementById('edit-last-name').value = client.last_name;
+            document.getElementById('edit-phone').value = client.phone;
+            document.getElementById('edit-email').value = client.email;
+            document.getElementById('edit-nid').value = client.nid;
+            document.getElementById('edit-birth-date').value = client.birth_date;
+            document.getElementById('edit-address').value = client.address;
+            document.getElementById('edit-area').value = client.area;
+            document.getElementById('edit-city').value = client.city;
+            document.getElementById('edit-postal-code').value = client.postal_code;
+            renderEditPackageOptions(client.package_slug || '');
+            document.getElementById('edit-package').value = client.package_slug;
+            document.getElementById('edit-installation-date').value = client.installation_date;
+            document.getElementById('edit-connection-type').value = client.connection_type;
+            document.getElementById('edit-username').value = client.connection_username;
+            document.getElementById('edit-connection-mail').value = client.connection_email;
+            document.getElementById('edit-onu-mac').value = client.onu_mac;
+            document.getElementById('edit-router-ip').value = client.router_ip;
+            document.getElementById('edit-payment-cycle-date').value = client.payment_cycle_date || '';
+            document.getElementById('edit-referral-name').value = client.referral_name || '';
+            document.getElementById('edit-emergency-contact').value = client.emergency_contact || '';
+            document.getElementById('edit-notes').value = client.notes || '';
+            editModal.classList.add('active');
+          }
+        } catch (error) {
+          alert('Failed to load client details');
+        }
+      }
+
+      function closeEditModal() {
+        editModal.classList.remove('active');
+        currentEditingClientId = null;
+        editForm.reset();
+      }
+
+      async function updateClient(event) {
+        event.preventDefault();
+        if (!canEditClients) {
+          alert('You do not have permission to update clients');
+          return;
+        }
+        const pwd = document.getElementById('edit-connection-password').value;
+
+        const payload = {
+          id: currentEditingClientId,
+          first_name: document.getElementById('edit-first-name').value,
+          last_name: document.getElementById('edit-last-name').value,
+          phone: document.getElementById('edit-phone').value,
+          email: document.getElementById('edit-email').value,
+          nid: document.getElementById('edit-nid').value,
+          birth_date: document.getElementById('edit-birth-date').value,
+          address: document.getElementById('edit-address').value,
+          area: document.getElementById('edit-area').value,
+          city: document.getElementById('edit-city').value,
+          postal_code: document.getElementById('edit-postal-code').value,
+          package_slug: document.getElementById('edit-package').value,
+          installation_date: document.getElementById('edit-installation-date').value,
+          connection_type: document.getElementById('edit-connection-type').value,
+          onu_mac: document.getElementById('edit-onu-mac').value,
+          router_ip: document.getElementById('edit-router-ip').value,
+          payment_cycle_date: document.getElementById('edit-payment-cycle-date').value,
+          referral_name: document.getElementById('edit-referral-name').value,
+          emergency_contact: document.getElementById('edit-emergency-contact').value,
+          notes: document.getElementById('edit-notes').value,
+          connection_password: pwd,
+        };
+
+        try {
+          const res = await fetch('backend/public/clients/update.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.ok) {
+            alert('Client updated successfully');
+            closeEditModal();
+            await loadClients();
+          } else {
+            alert('Error: ' + data.message);
+          }
+        } catch (error) {
+          alert('Failed to update client');
+        }
+      }
+
+      async function deleteClient(clientId) {
+        if (!canDeleteClients) {
+          alert('You do not have permission to delete clients');
+          return;
+        }
+        if (!confirm('Are you sure you want to delete this client? All related data will be removed.')) return;
+
+        try {
+          const res = await fetch('backend/public/clients/delete.php', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ id: clientId })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            alert('Client deleted successfully');
+            await loadClients();
+          } else {
+            alert('Error: ' + data.message);
+          }
+        } catch (error) {
+          alert('Failed to delete client');
+        }
+      }
+
+      function exportToExcel() {
+        if (allClients.length === 0) { alert('No clients to export'); return; }
+        const ws = XLSX.utils.json_to_sheet(allClients);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Clients');
+        XLSX.writeFile(wb, 'clients_' + new Date().getTime() + '.xlsx');
+      }
+
+      function exportToPDF() {
+        if (allClients.length === 0) { alert('No clients to export'); return; }
+        if (!window.jspdf) { alert('PDF library not loaded'); return; }
+        const jsPDF = window.jspdf.jsPDF;
+        const doc = new jsPDF();
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.text('Promee Internet - Client Report', 14, 14);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text('Generated: ' + new Date().toLocaleString(), 14, 22);
+        const cols = ['Code', 'Name', 'Phone', 'Zone', 'Package', 'Status'];
+        const rows = allClients.map(c => [c.client_code, c.full_name, c.phone, c.zone_name, c.package_name, c.status]);
+        doc.autoTable({ head: [cols], body: rows, startY: 30 });
+        doc.save('clients_report_' + new Date().getTime() + '.pdf');
+      }
+
+      function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func(...args), wait);
+        };
+      }
+
+      (async function () {
+        const loggedIn = await ensureAuth();
+        if (loggedIn) {
+          await loadPackagesFromDb();
+          await loadClients();
+        }
+      })();
+    </script>
+  </body>
+</html>
+
+
+
+

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - Ticket Reports</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .report-card {
+        height: 100%;
+      }
+      .chart-placeholder {
+        height: 200px;
+        background: #f8f9fa;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        margin-top: 20px;
+      }
+      .metric-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+      }
+      .mini-card {
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+        background: #f8fbff;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+<div class="main-content">
+<div class="page-content">
+        <div class="content-header">
+          <h1>Ticket Reports</h1>
+          <p>Performance analytics and resolution trends</p>
+        </div>
+
+        <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
+          <button id="reportsRefresh" style="border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:8px 10px;cursor:pointer">Refresh</button>
+        </div>
+
+        <div class="grid-3">
+          <div class="card report-card">
+            <h4>Total Tickets</h4>
+            <div class="metric-value" id="rTotal">0</div>
+            <div class="mini-grid" style="margin-top:12px">
+              <div class="mini-card"><div>Pending</div><b id="rPending">0</b></div>
+              <div class="mini-card"><div>In Progress</div><b id="rProgress">0</b></div>
+              <div class="mini-card"><div>Resolved/Closed</div><b id="rResolved">0</b></div>
+              <div class="mini-card"><div>Urgent</div><b id="rUrgent">0</b></div>
+            </div>
+          </div>
+          <div class="card report-card">
+            <h4>Tickets by Priority</h4>
+            <div class="mini-grid" style="margin-top:10px">
+              <div class="mini-card"><div>Critical</div><b id="pCritical">0</b></div>
+              <div class="mini-card"><div>High</div><b id="pHigh">0</b></div>
+              <div class="mini-card"><div>Medium</div><b id="pMedium">0</b></div>
+              <div class="mini-card"><div>Low</div><b id="pLow">0</b></div>
+            </div>
+          </div>
+          <div class="card report-card">
+            <h4>Status Distribution</h4>
+            <div class="mini-grid" style="margin-top:10px">
+              <div class="mini-card"><div>Pending</div><b id="sPending">0</b></div>
+              <div class="mini-card"><div>In Progress</div><b id="sProgress">0</b></div>
+              <div class="mini-card"><div>Resolved</div><b id="sResolved">0</b></div>
+              <div class="mini-card"><div>Closed</div><b id="sClosed">0</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      async function loadTicketReports() {
+        const res = await fetch("backend/public/support/tickets_customer_list.php?limit=500", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        const data = await res.json();
+        if (!res.ok || !data || data.ok === false) {
+          throw new Error((data && data.message) || "Failed to load ticket reports");
+        }
+
+        const stats = data.stats || {};
+        const tickets = Array.isArray(data.tickets) ? data.tickets : [];
+
+        const byPriority = { critical: 0, high: 0, medium: 0, low: 0 };
+        const byStatus = { pending: 0, in_progress: 0, resolved: 0, closed: 0 };
+
+        tickets.forEach((t) => {
+          const p = String(t.priority || "medium").toLowerCase();
+          const s = String(t.status || "pending").toLowerCase();
+          if (Object.prototype.hasOwnProperty.call(byPriority, p)) byPriority[p] += 1;
+          if (Object.prototype.hasOwnProperty.call(byStatus, s)) byStatus[s] += 1;
+        });
+
+        document.getElementById("rTotal").textContent = String(Number(stats.total || tickets.length || 0));
+        document.getElementById("rPending").textContent = String(Number(stats.pending_count || 0));
+        document.getElementById("rProgress").textContent = String(Number(stats.in_progress_count || 0));
+        document.getElementById("rResolved").textContent = String(Number(stats.resolved_count || 0));
+        document.getElementById("rUrgent").textContent = String(Number(stats.urgent_count || 0));
+
+        document.getElementById("pCritical").textContent = String(byPriority.critical);
+        document.getElementById("pHigh").textContent = String(byPriority.high);
+        document.getElementById("pMedium").textContent = String(byPriority.medium);
+        document.getElementById("pLow").textContent = String(byPriority.low);
+
+        document.getElementById("sPending").textContent = String(byStatus.pending);
+        document.getElementById("sProgress").textContent = String(byStatus.in_progress);
+        document.getElementById("sResolved").textContent = String(byStatus.resolved);
+        document.getElementById("sClosed").textContent = String(byStatus.closed);
+      }
+
+      document.getElementById("reportsRefresh").addEventListener("click", async () => {
+        try {
+          await loadTicketReports();
+        } catch (err) {
+          alert(err.message || "Failed to load ticket reports");
+        }
+      });
+
+      loadTicketReports().catch((err) => {
+        alert(err.message || "Failed to load ticket reports");
+      });
+    </script>
+  </body>
+</html>
+
+
+
+

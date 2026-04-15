@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - Mikrotik Bulk Provisioning</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      :root {
+        --mk-bg-a: #f0f7ff;
+        --mk-bg-b: #e5f0fb;
+        --mk-ink: #0f1f30;
+        --mk-soft: #5d6d7f;
+        --mk-blue: #115fdd;
+        --mk-green: #0f766e;
+        --mk-orange: #c65d1e;
+        --mk-red: #b42318;
+      }
+      .mk-shell {
+        position: relative;
+        border-radius: 22px;
+        padding: 20px;
+        background:
+          radial-gradient(circle at 10% 0%, rgba(17, 95, 221, 0.18), transparent 30%),
+          radial-gradient(circle at 90% 12%, rgba(15, 118, 110, 0.16), transparent 28%),
+          linear-gradient(150deg, var(--mk-bg-a), var(--mk-bg-b));
+        overflow: hidden;
+      }
+      .mk-shell::before {
+        content: "";
+        position: absolute;
+        width: 280px;
+        height: 280px;
+        border-radius: 999px;
+        right: -90px;
+        bottom: -100px;
+        background: rgba(198, 93, 30, 0.12);
+      }
+      .mk-head,
+      .mk-grid,
+      .mk-card,
+      .mk-table-wrap {
+        position: relative;
+        z-index: 1;
+      }
+      .mk-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .mk-title h1 {
+        color: var(--mk-ink);
+        margin-bottom: 6px;
+      }
+      .mk-title p {
+        color: var(--mk-soft);
+      }
+      .mk-pill {
+        font-size: 12px;
+        font-weight: 700;
+        color: #083344;
+        background: #d9f5ff;
+        border: 1px solid #b6e9fb;
+        padding: 8px 12px;
+        border-radius: 999px;
+      }
+      .mk-hero {
+        margin: 14px 0 18px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .mk-stat {
+        color: #fff;
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: 0 14px 26px rgba(15, 23, 42, 0.12);
+        transform: translateY(12px);
+        opacity: 0;
+        animation: rise 0.45s ease forwards;
+      }
+      .mk-stat:nth-child(1) { background: linear-gradient(135deg, #115fdd, #1e80ff); }
+      .mk-stat:nth-child(2) { background: linear-gradient(135deg, #0f766e, #14b8a6); animation-delay: 0.05s; }
+      .mk-stat:nth-child(3) { background: linear-gradient(135deg, #c65d1e, #f97316); animation-delay: 0.1s; }
+      .mk-stat:nth-child(4) { background: linear-gradient(135deg, #9f1239, #e11d48); animation-delay: 0.15s; }
+      .mk-stat .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; opacity: 0.9; }
+      .mk-stat .value { font-size: 30px; font-weight: 800; margin-top: 4px; }
+      .mk-stat .sub { font-size: 12px; opacity: 0.9; }
+      .mk-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 14px;
+      }
+      .mk-card {
+        border-radius: 16px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+        background: #fff;
+      }
+      .mk-card-head {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e5edf6;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+      }
+      .mk-card-head h3 { margin: 0; color: #0f172a; }
+      .mk-card-body { padding: 14px 16px; }
+      .mk-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .mk-help {
+        border: 1px dashed #b9cde1;
+        border-radius: 12px;
+        background: #f8fbff;
+        padding: 12px;
+        color: #2e3f52;
+        display: none;
+        margin-top: 12px;
+      }
+      .mk-help.active { display: block; animation: fade 0.3s ease; }
+      .mk-checks {
+        display: grid;
+        gap: 8px;
+      }
+      .mk-check {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+      }
+      .mk-check strong { color: #0f172a; }
+      .mk-filter {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .mk-filter .form-group { margin: 0; }
+      .mk-filter input,
+      .mk-filter select {
+        min-width: 190px;
+        padding: 8px 10px;
+      }
+      .mk-table-wrap {
+        margin-top: 12px;
+        overflow: auto;
+        border: 1px solid #dde8f3;
+        border-radius: 14px;
+        background: #fff;
+      }
+      .mk-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1320px;
+      }
+      .mk-table th,
+      .mk-table td {
+        padding: 10px;
+        border-bottom: 1px solid #edf2f7;
+        text-align: left;
+        font-size: 13px;
+      }
+      .mk-table th {
+        position: sticky;
+        top: 0;
+        background: #f1f6fc;
+        color: #0f172a;
+        z-index: 1;
+      }
+      .mk-badge {
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .mk-badge.pending { background: #fef3c7; color: #854d0e; }
+      .mk-badge.imported { background: #dcfce7; color: #166534; }
+      .mk-badge.error { background: #fee2e2; color: #991b1b; }
+      .mk-row-actions { display: flex; gap: 6px; }
+      .mk-footer {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        color: #54657a;
+        font-size: 13px;
+      }
+      .mk-pagination { display: flex; gap: 6px; }
+      .mk-pagination button { min-width: 32px; }
+      .mk-message {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        display: none;
+      }
+      .mk-message.ok { display: block; background: #eafaf0; color: #156c43; border: 1px solid #b8e7cc; }
+      .mk-message.error { display: block; background: #fef1f1; color: #9f2222; border: 1px solid #f7c6c6; }
+      @keyframes rise {
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fade {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @media (max-width: 1100px) {
+        .mk-grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 860px) {
+        .mk-shell { padding: 12px; border-radius: 14px; }
+        .mk-hero { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 580px) {
+        .mk-hero { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+    <div class="main-content">
+      <div class="page-content">
+        <div class="mk-shell">
+          <div class="mk-head">
+            <div class="mk-title">
+              <h1><i class="fa-solid fa-server"></i> Mikrotik Bulk Provisioning Desk</h1>
+              <p>Employee-side ISP import workflow with 24-hour queue, preflight checks, and one-click processing.</p>
+            </div>
+            <div class="mk-pill"><i class="fa-solid fa-clock"></i> Queue auto-expires in 24 hours</div>
+          </div>
+
+          <div class="mk-hero">
+            <div class="mk-stat"><div class="label">Queued Rows</div><div class="value" id="statTotal">0</div><div class="sub">Ready for operations</div></div>
+            <div class="mk-stat"><div class="label">Pending Import</div><div class="value" id="statPending">0</div><div class="sub">Awaiting processing</div></div>
+            <div class="mk-stat"><div class="label">Imported</div><div class="value" id="statImported">0</div><div class="sub">Pushed to clients</div></div>
+            <div class="mk-stat"><div class="label">Failed Rows</div><div class="value" id="statError">0</div><div class="sub">Need correction</div></div>
+          </div>
+
+          <div class="mk-grid">
+            <div class="mk-card">
+              <div class="mk-card-head">
+                <h3><i class="fa-solid fa-file-arrow-up"></i> Import Actions</h3>
+                <div class="mk-actions">
+                  <button class="btn btn-navy" id="btnRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                  <button class="btn btn-navy" id="btnProcess"><i class="fa-solid fa-gears"></i> Process Pending</button>
+                </div>
+              </div>
+              <div class="mk-card-body">
+                <div class="mk-actions">
+                  <button class="btn btn-default" id="btnSample"><i class="fa-solid fa-file-csv"></i> Download Sample CSV</button>
+                  <label class="btn btn-navy" for="uploadFile"><i class="fa-solid fa-file-import"></i> Upload CSV</label>
+                  <input id="uploadFile" type="file" accept=".csv,text/csv" style="display:none" />
+                  <button class="btn btn-navy" id="btnExport"><i class="fa-solid fa-file-export"></i> Download Edited Data</button>
+                  <button class="btn btn-navy" id="btnClear"><i class="fa-solid fa-broom"></i> Clear All Rows</button>
+                </div>
+                <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+                  <label style="display:flex; align-items:center; gap:8px; color:#334155;"><input type="checkbox" id="replaceExisting" /> Replace existing queue on upload</label>
+                  <button type="button" class="btn btn-default" id="btnGuide"><i class="fa-solid fa-circle-info"></i> Learn Import Guide</button>
+                </div>
+                <div id="importGuide" class="mk-help">
+                  <strong>CSV Rules</strong>
+                  <div>1. Mandatory columns: name, mobile, username, password.</div>
+                  <div>2. Use yyyy-mm-dd for join_date and exp_date.</div>
+                  <div>3. Keep username unique to avoid import errors.</div>
+                  <div>4. Processed rows are pushed to clients table with active status.</div>
+                </div>
+                <div id="pageMessage" class="mk-message"></div>
+              </div>
+            </div>
+
+            <div class="mk-card">
+              <div class="mk-card-head">
+                <h3><i class="fa-solid fa-shield-halved"></i> Mikrotik Preflight</h3>
+              </div>
+              <div class="mk-card-body">
+                <div class="mk-checks" id="preflightChecks">
+                  <div class="mk-check"><span>Total usernames</span><strong id="checkUsers">0</strong></div>
+                  <div class="mk-check"><span>Duplicate usernames</span><strong id="checkDup">0</strong></div>
+                  <div class="mk-check"><span>PPPoE profiles</span><strong id="checkPppoe">0</strong></div>
+                  <div class="mk-check"><span>Static/IPoE profiles</span><strong id="checkIpoe">0</strong></div>
+                  <div class="mk-check"><span>Rows with missing credentials</span><strong id="checkMissing">0</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mk-filter">
+            <div class="form-group">
+              <label for="entriesSelect">Show</label>
+              <select id="entriesSelect">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="statusFilter">Status</label>
+              <select id="statusFilter">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="imported">Imported</option>
+                <option value="error">Error</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="searchInput">Search</label>
+              <input id="searchInput" type="text" placeholder="Name, mobile, username, package" />
+            </div>
+          </div>
+
+          <div class="mk-table-wrap">
+            <table class="mk-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Mobile</th>
+                  <th>Email</th>
+                  <th>NationalID</th>
+                  <th>Address</th>
+                  <th>Zone</th>
+                  <th>Conn.Type</th>
+                  <th>Server</th>
+                  <th>Prot.Type</th>
+                  <th>Profile</th>
+                  <th>UserName</th>
+                  <th>Password</th>
+                  <th>C.Type</th>
+                  <th>Package</th>
+                  <th>B.Status</th>
+                  <th>M.Bill</th>
+                  <th>Bill.Month</th>
+                  <th>Join.Date</th>
+                  <th>Exp.Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr><td colspan="21" style="text-align:center; padding:18px;">Loading rows...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mk-footer">
+            <div id="tableMeta">Showing 0 to 0 of 0 entries</div>
+            <div class="mk-pagination" id="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      const API = {
+        list: 'backend/public/mikrotik/bulk_import_list.php',
+        upload: 'backend/public/mikrotik/bulk_import_upload.php',
+        clear: 'backend/public/mikrotik/bulk_import_clear.php',
+        process: 'backend/public/mikrotik/bulk_import_process.php',
+        del: 'backend/public/mikrotik/bulk_import_delete.php',
+      };
+
+      const state = {
+        rows: [],
+        page: 1,
+        perPage: 25,
+        search: '',
+        status: '',
+        canEdit: false,
+      };
+
+      const el = {
+        tableBody: document.getElementById('tableBody'),
+        tableMeta: document.getElementById('tableMeta'),
+        pagination: document.getElementById('pagination'),
+        message: document.getElementById('pageMessage'),
+      };
+
+      function setMessage(text, isError) {
+        if (!text) {
+          el.message.className = 'mk-message';
+          el.message.textContent = '';
+          return;
+        }
+        el.message.className = isError ? 'mk-message error' : 'mk-message ok';
+        el.message.textContent = text;
+      }
+
+      function setEditMode(enabled) {
+        state.canEdit = !!enabled;
+        ['btnProcess', 'btnSample', 'btnExport', 'btnClear', 'uploadFile', 'replaceExisting'].forEach((id) => {
+          const node = document.getElementById(id);
+          if (node) {
+            node.disabled = !state.canEdit;
+          }
+        });
+      }
+
+      function esc(v) {
+        const d = document.createElement('div');
+        d.textContent = v == null ? '' : String(v);
+        return d.innerHTML;
+      }
+
+      function toNum(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function parseCsv(text) {
+        const lines = text.split(/\r?\n/).filter((line) => line.trim() !== '');
+        if (!lines.length) return [];
+
+        const parseLine = (line) => {
+          const result = [];
+          let current = '';
+          let inQuotes = false;
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              if (inQuotes && line[i + 1] === '"') {
+                current += '"';
+                i++;
+              } else {
+                inQuotes = !inQuotes;
+              }
+            } else if (char === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        };
+
+        const headers = parseLine(lines[0]).map((h) => h.toLowerCase());
+        return lines.slice(1).map((line) => {
+          const cells = parseLine(line);
+          const row = {};
+          headers.forEach((h, i) => {
+            row[h] = cells[i] || '';
+          });
+          return row;
+        });
+      }
+
+      function formatMoney(v) {
+        const n = toNum(v);
+        return n ? n.toFixed(2) : '';
+      }
+
+      function updateStats(stats) {
+        document.getElementById('statTotal').textContent = stats.total_rows || 0;
+        document.getElementById('statPending').textContent = stats.pending_rows || 0;
+        document.getElementById('statImported').textContent = stats.imported_rows || 0;
+        document.getElementById('statError').textContent = stats.error_rows || 0;
+      }
+
+      function updatePreflight(rows) {
+        const usernames = rows.map((r) => String(r.username || '').trim().toLowerCase()).filter(Boolean);
+        const dupCount = usernames.length - new Set(usernames).size;
+        const pppoe = rows.filter((r) => String(r.protocol_type || '').toLowerCase().includes('pppoe')).length;
+        const ipoe = rows.filter((r) => {
+          const p = String(r.protocol_type || '').toLowerCase();
+          return p.includes('ipoe') || p.includes('static');
+        }).length;
+        const missing = rows.filter((r) => !String(r.username || '').trim() || !String(r.password_plain || '').trim()).length;
+
+        document.getElementById('checkUsers').textContent = usernames.length;
+        document.getElementById('checkDup').textContent = dupCount;
+        document.getElementById('checkPppoe').textContent = pppoe;
+        document.getElementById('checkIpoe').textContent = ipoe;
+        document.getElementById('checkMissing').textContent = missing;
+      }
+
+      function currentRows() {
+        const s = state.search.trim().toLowerCase();
+        return state.rows.filter((r) => {
+          const statusOk = !state.status || String(r.row_status || '').toLowerCase() === state.status;
+          if (!statusOk) return false;
+          if (!s) return true;
+          const blob = `${r.full_name || ''} ${r.mobile || ''} ${r.username || ''} ${r.package_name || ''} ${r.server_name || ''}`.toLowerCase();
+          return blob.includes(s);
+        });
+      }
+
+      function renderTable() {
+        const rows = currentRows();
+        const total = rows.length;
+        const perPage = state.perPage;
+        const pages = Math.max(1, Math.ceil(total / perPage));
+        if (state.page > pages) state.page = pages;
+
+        const start = (state.page - 1) * perPage;
+        const pageRows = rows.slice(start, start + perPage);
+
+        if (!pageRows.length) {
+          el.tableBody.innerHTML = '<tr><td colspan="21" style="text-align:center; padding:18px;">No data available</td></tr>';
+        } else {
+          el.tableBody.innerHTML = pageRows.map((r) => `
+            <tr>
+              <td>${esc(r.full_name || '')}</td>
+              <td>${esc(r.mobile || '')}</td>
+              <td>${esc(r.email || '')}</td>
+              <td>${esc(r.national_id || '')}</td>
+              <td>${esc(r.address_line || '')}</td>
+              <td>${esc(r.zone_name || '')}</td>
+              <td>${esc(r.connection_type || '')}</td>
+              <td>${esc(r.server_name || '')}</td>
+              <td>${esc(r.protocol_type || '')}</td>
+              <td>${esc(r.profile_name || '')}</td>
+              <td>${esc(r.username || '')}</td>
+              <td>${esc(r.password_plain || '')}</td>
+              <td>${esc(r.customer_type || '')}</td>
+              <td>${esc(r.package_name || '')}</td>
+              <td>${esc(r.billing_status || '')}</td>
+              <td>${esc(formatMoney(r.monthly_bill))}</td>
+              <td>${esc(r.bill_month || '')}</td>
+              <td>${esc(r.join_date || '')}</td>
+              <td>${esc(r.expire_date || '')}</td>
+              <td><span class="mk-badge ${esc(r.row_status || 'pending')}">${esc(r.row_status || 'pending')}</span>${r.status_note ? '<br><small style="color:#b42318;">' + esc(r.status_note) + '</small>' : ''}</td>
+              <td>
+                <div class="mk-row-actions">
+                  ${state.canEdit ? `<button class="btn btn-sm btn-navy" data-action="delete" data-id="${r.id}" type="button"><i class="fa-solid fa-trash"></i></button>` : '<span style="font-size:12px;color:#64748b;">View only</span>'}
+                </div>
+              </td>
+            </tr>
+          `).join('');
+        }
+
+        const from = total ? start + 1 : 0;
+        const to = Math.min(start + perPage, total);
+        el.tableMeta.textContent = `Showing ${from} to ${to} of ${total} entries`;
+
+        el.pagination.innerHTML = '';
+        const addPageBtn = (label, page, disabled, active) => {
+          const b = document.createElement('button');
+          b.className = active ? 'btn btn-navy' : 'btn btn-default';
+          b.type = 'button';
+          b.textContent = label;
+          b.disabled = !!disabled;
+          b.addEventListener('click', () => {
+            state.page = page;
+            renderTable();
+          });
+          el.pagination.appendChild(b);
+        };
+
+        addPageBtn('Prev', Math.max(1, state.page - 1), state.page === 1, false);
+        for (let p = 1; p <= pages; p++) {
+          if (p === 1 || p === pages || Math.abs(p - state.page) <= 1) {
+            addPageBtn(String(p), p, false, p === state.page);
+          }
+        }
+        addPageBtn('Next', Math.min(pages, state.page + 1), state.page === pages, false);
+      }
+
+      async function loadRows() {
+        const res = await fetch(API.list, { credentials: 'same-origin' });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message || 'Failed to load rows');
+        }
+        state.rows = Array.isArray(data.rows) ? data.rows : [];
+        setEditMode(Boolean(data.can_edit));
+        updateStats(data.stats || {});
+        updatePreflight(state.rows);
+        renderTable();
+      }
+
+      async function uploadRows(parsedRows) {
+        const replaceExisting = document.getElementById('replaceExisting').checked;
+        const res = await fetch(API.upload, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rows: parsedRows, replace_existing: replaceExisting }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error((data.message || 'Upload failed') + (data.error ? ': ' + data.error : ''));
+        }
+        setMessage(`Uploaded ${data.inserted || 0} rows (Batch ${data.batch_id || '-'})`, false);
+      }
+
+      async function clearRows() {
+        const res = await fetch(API.clear, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message || 'Failed to clear rows');
+        }
+        setMessage(`Cleared ${data.deleted || 0} rows`, false);
+      }
+
+      async function processRows() {
+        const res = await fetch(API.process, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error((data.message || 'Failed to process') + (data.error ? ': ' + data.error : ''));
+        }
+        setMessage(`Processed: ${data.processed || 0}, Failed: ${data.failed || 0}`, false);
+      }
+
+      async function deleteRow(rowId) {
+        const res = await fetch(API.del, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ row_id: Number(rowId) }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message || 'Delete failed');
+        }
+      }
+
+      function downloadSample() {
+        const headers = ['name','mobile','email','national_id','address','zone','conn_type','server','prot_type','profile','username','password','c_type','package','b_status','m_bill','bill_month','join_date','exp_date'];
+        const sample = [
+          ['Arafat Hossain','01710000000','arafat@example.com','NID-112233','Holding 45, Road 2','Zone-3','fiber','MKT-Core-01','pppoe','10Mbps-Home','arafat.h','Pass#1234','Home','Starter 10Mbps','unpaid','900','2026-04','2026-04-01','2027-03-31'],
+          ['Nusrat Jahan','01820000000','nusrat@example.com','NID-223344','Holding 12, Lane 5','Zone-2','wireless','MKT-POP-02','ipoe','20Mbps-Business','nusrat.j','Pass#5678','Business','Business 20Mbps','paid','1500','2026-04','2026-04-02','2027-04-01']
+        ];
+
+        const csv = [headers.join(','), ...sample.map((row) => row.map((cell) => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mikrotik_bulk_import_sample.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function exportCurrentData() {
+        const headers = ['name','mobile','email','national_id','address','zone','conn_type','server','prot_type','profile','username','password','c_type','package','b_status','m_bill','bill_month','join_date','exp_date','row_status','status_note'];
+        const csvRows = state.rows.map((r) => [
+          r.full_name || '', r.mobile || '', r.email || '', r.national_id || '', r.address_line || '', r.zone_name || '',
+          r.connection_type || '', r.server_name || '', r.protocol_type || '', r.profile_name || '', r.username || '',
+          r.password_plain || '', r.customer_type || '', r.package_name || '', r.billing_status || '', formatMoney(r.monthly_bill),
+          r.bill_month || '', r.join_date || '', r.expire_date || '', r.row_status || '', r.status_note || ''
+        ]);
+        const csv = [headers.join(','), ...csvRows.map((row) => row.map((cell) => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mikrotik_bulk_import_export_' + Date.now() + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      async function initialize() {
+        try {
+          await loadRows();
+        } catch (err) {
+          setMessage(err.message || 'Failed to initialize page', true);
+          el.tableBody.innerHTML = '<tr><td colspan="21" style="text-align:center; padding:18px; color:#b42318;">' + esc(err.message || 'Failed to load') + '</td></tr>';
+        }
+      }
+
+      document.getElementById('btnGuide').addEventListener('click', () => {
+        document.getElementById('importGuide').classList.toggle('active');
+      });
+
+      document.getElementById('btnSample').addEventListener('click', downloadSample);
+      document.getElementById('btnExport').addEventListener('click', exportCurrentData);
+
+      document.getElementById('btnRefresh').addEventListener('click', async () => {
+        setMessage('', false);
+        try {
+          await loadRows();
+        } catch (err) {
+          setMessage(err.message || 'Refresh failed', true);
+        }
+      });
+
+      document.getElementById('btnClear').addEventListener('click', async () => {
+        if (!state.canEdit) {
+          setMessage('View-only access: clear is disabled', true);
+          return;
+        }
+        if (!confirm('Clear all queued rows?')) return;
+        try {
+          await clearRows();
+          await loadRows();
+        } catch (err) {
+          setMessage(err.message || 'Clear failed', true);
+        }
+      });
+
+      document.getElementById('btnProcess').addEventListener('click', async () => {
+        if (!state.canEdit) {
+          setMessage('View-only access: processing is disabled', true);
+          return;
+        }
+        if (!confirm('Process pending rows into clients table now?')) return;
+        try {
+          await processRows();
+          await loadRows();
+        } catch (err) {
+          setMessage(err.message || 'Process failed', true);
+        }
+      });
+
+      document.getElementById('uploadFile').addEventListener('change', async (event) => {
+        if (!state.canEdit) {
+          event.target.value = '';
+          setMessage('View-only access: upload is disabled', true);
+          return;
+        }
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        try {
+          const content = await file.text();
+          const parsedRows = parseCsv(content);
+          if (!parsedRows.length) {
+            throw new Error('No valid CSV rows found');
+          }
+          await uploadRows(parsedRows);
+          await loadRows();
+        } catch (err) {
+          setMessage(err.message || 'Upload failed', true);
+        } finally {
+          event.target.value = '';
+        }
+      });
+
+      document.getElementById('entriesSelect').addEventListener('change', (e) => {
+        state.perPage = Number(e.target.value) || 25;
+        state.page = 1;
+        renderTable();
+      });
+
+      document.getElementById('statusFilter').addEventListener('change', (e) => {
+        state.status = e.target.value;
+        state.page = 1;
+        renderTable();
+      });
+
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        state.search = e.target.value;
+        state.page = 1;
+        renderTable();
+      });
+
+      el.tableBody.addEventListener('click', async (event) => {
+        if (!state.canEdit) {
+          setMessage('View-only access: row actions are disabled', true);
+          return;
+        }
+        const btn = event.target.closest('button[data-action]');
+        if (!btn) return;
+        const action = btn.getAttribute('data-action');
+        const id = Number(btn.getAttribute('data-id'));
+        if (action !== 'delete' || !id) return;
+
+        if (!confirm('Delete this row from queue?')) return;
+        try {
+          await deleteRow(id);
+          setMessage('Row deleted', false);
+          await loadRows();
+        } catch (err) {
+          setMessage(err.message || 'Delete failed', true);
+        }
+      });
+
+      initialize();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Archivo:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>Promee Internet - Payroll</title>
+    <style>
+      :root {
+        --bg: #f4f7ff;
+        --panel: #ffffff;
+        --line: #d5def2;
+        --text-main: #17284b;
+        --text-soft: #58709a;
+        --brand: #2f67f5;
+        --brand-strong: #1446be;
+        --accent: #f8a227;
+        --ok: #0f9e67;
+        --warn: #c97d00;
+        --danger: #d8434c;
+        --shadow: 0 15px 36px rgba(20, 47, 104, 0.14);
+      }
+
+      .payroll-page {
+        min-height: calc(100vh - 70px);
+        padding: 18px;
+        font-family: 'Manrope', sans-serif;
+        color: var(--text-main);
+        background:
+          radial-gradient(circle at 12% 6%, rgba(47, 103, 245, 0.16), transparent 30%),
+          radial-gradient(circle at 86% 18%, rgba(248, 162, 39, 0.16), transparent 28%),
+          linear-gradient(145deg, #f8faff, #eef3ff);
+      }
+
+      .payroll-shell {
+        max-width: 1540px;
+        margin: 0 auto;
+        display: grid;
+        gap: 14px;
+      }
+
+      .hero {
+        background: linear-gradient(120deg, #ffffff, #eef3ff);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+        animation: rise 420ms ease-out;
+      }
+
+      .hero h2 {
+        margin: 0;
+        font-family: 'Archivo', sans-serif;
+        font-size: 1.28rem;
+      }
+
+      .hero p {
+        margin: 6px 0 0;
+        color: var(--text-soft);
+        font-size: 0.91rem;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 11px;
+        padding: 10px 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn.primary {
+        background: linear-gradient(140deg, var(--brand), var(--brand-strong));
+        color: #fff;
+        box-shadow: 0 9px 16px rgba(47, 103, 245, 0.3);
+      }
+
+      .btn.secondary {
+        background: #fff;
+        border: 1px solid var(--line);
+        color: var(--text-main);
+      }
+
+      .kpis {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(6, minmax(150px, 1fr));
+      }
+
+      .kpi {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 12px;
+        animation: rise 520ms ease-out;
+      }
+
+      .kpi .label {
+        color: var(--text-soft);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.42px;
+      }
+
+      .kpi .value {
+        margin-top: 7px;
+        font-size: 1.2rem;
+        font-weight: 800;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .controls {
+        padding: 12px;
+        display: grid;
+        gap: 9px;
+        grid-template-columns: repeat(8, minmax(115px, 1fr));
+        animation: rise 620ms ease-out;
+      }
+
+      .controls label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.72rem;
+        color: var(--text-soft);
+        font-weight: 700;
+      }
+
+      .controls input,
+      .controls select {
+        width: 100%;
+        min-height: 37px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 6px 8px;
+        background: #f9fbff;
+        color: var(--text-main);
+        font-size: 0.86rem;
+      }
+
+      .status-line {
+        padding: 0 12px 11px;
+        color: var(--text-soft);
+        font-size: 0.82rem;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        animation: rise 740ms ease-out;
+      }
+
+      .payroll-table {
+        width: 100%;
+        min-width: 1580px;
+        border-collapse: collapse;
+      }
+
+      .payroll-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #edf3ff;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #39537f;
+        padding: 9px 8px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+      }
+
+      .payroll-table tbody td {
+        padding: 8px;
+        border-bottom: 1px solid #e8eef8;
+        font-size: 0.84rem;
+      }
+
+      .payroll-table tbody tr:hover {
+        background: #f6f9ff;
+      }
+
+      .payroll-table tfoot td {
+        padding: 10px 8px;
+        font-weight: 800;
+        border-top: 2px solid var(--line);
+        background: #f3f7ff;
+      }
+
+      .money {
+        text-align: right;
+        white-space: nowrap;
+        font-weight: 700;
+      }
+
+      .row-input,
+      .row-select {
+        width: 100%;
+        min-height: 33px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 5px 7px;
+        font-size: 0.82rem;
+        background: #fbfdff;
+        color: var(--text-main);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        padding: 4px 8px;
+        font-weight: 700;
+      }
+
+      .pill.pending {
+        background: #fff0dc;
+        color: var(--warn);
+      }
+
+      .pill.paid {
+        background: #dff7eb;
+        color: var(--ok);
+      }
+
+      .pill.hold {
+        background: #ffe3e6;
+        color: var(--danger);
+      }
+
+      .pill.processed {
+        background: #e8efff;
+        color: #2f5dc7;
+      }
+
+      .employee-cell {
+        min-width: 210px;
+      }
+
+      .name {
+        margin: 0;
+        font-weight: 700;
+      }
+
+      .meta {
+        margin: 2px 0 0;
+        font-size: 0.75rem;
+        color: var(--text-soft);
+      }
+
+      .empty {
+        text-align: center;
+        color: var(--text-soft);
+        padding: 26px;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(9px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1300px) {
+        .kpis {
+          grid-template-columns: repeat(3, minmax(150px, 1fr));
+        }
+
+        .controls {
+          grid-template-columns: repeat(4, minmax(120px, 1fr));
+        }
+      }
+
+      @media (max-width: 768px) {
+        .payroll-page {
+          padding: 10px;
+        }
+
+        .kpis,
+        .controls {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+
+    <div class="main-content">
+      <div class="payroll-page">
+        <div class="payroll-shell">
+          <section class="hero">
+            <div>
+              <h2><i class="fa-solid fa-money-check-dollar"></i> Payroll Processing Center</h2>
+              <p>Process monthly salary for all employees, update payment status, and export payroll sheet with full DB history.</p>
+            </div>
+            <div class="actions">
+              <button class="btn secondary" id="btnRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+              <button class="btn secondary" id="btnExport"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+              <button class="btn primary" id="btnProcess"><i class="fa-solid fa-gears"></i> Process Payroll</button>
+              <button class="btn primary" id="btnPayAll"><i class="fa-solid fa-sack-dollar"></i> Mark Filtered Paid</button>
+            </div>
+          </section>
+
+          <section class="kpis">
+            <div class="kpi"><div class="label">Employees</div><div class="value" id="kpiEmployees">0</div></div>
+            <div class="kpi"><div class="label">Gross Payroll</div><div class="value" id="kpiGross">BDT 0</div></div>
+            <div class="kpi"><div class="label">Deductions</div><div class="value" id="kpiDeduction">BDT 0</div></div>
+            <div class="kpi"><div class="label">Net Payroll</div><div class="value" id="kpiNet">BDT 0</div></div>
+            <div class="kpi"><div class="label">Paid</div><div class="value" id="kpiPaid">0</div></div>
+            <div class="kpi"><div class="label">Pending/Hold</div><div class="value" id="kpiPending">0</div></div>
+          </section>
+
+          <section class="panel">
+            <div class="controls">
+              <div>
+                <label for="monthInput">Payroll Month</label>
+                <input id="monthInput" type="month" />
+              </div>
+              <div>
+                <label for="departmentFilter">Department</label>
+                <select id="departmentFilter"><option value="all">All</option></select>
+              </div>
+              <div>
+                <label for="statusFilter">Employee Status</label>
+                <select id="statusFilter">
+                  <option value="all">All</option>
+                  <option value="Active">Active</option>
+                  <option value="Probation">Probation</option>
+                  <option value="On Leave">On Leave</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+              <div>
+                <label for="paymentFilter">Payment Status</label>
+                <select id="paymentFilter">
+                  <option value="all">All</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Processed">Processed</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Hold">Hold</option>
+                </select>
+              </div>
+              <div>
+                <label for="searchInput">Search</label>
+                <input id="searchInput" placeholder="Name, code, phone" />
+              </div>
+              <div>
+                <label for="taxInput">Tax %</label>
+                <input id="taxInput" type="number" min="0" step="0.01" value="5" />
+              </div>
+              <div>
+                <label for="pfInput">PF %</label>
+                <input id="pfInput" type="number" min="0" step="0.01" value="3" />
+              </div>
+              <div>
+                <label for="workingDaysInput">Working Days</label>
+                <input id="workingDaysInput" type="number" min="1" step="1" value="30" />
+              </div>
+            </div>
+            <div class="status-line" id="statusLine">Loading employees and payroll run...</div>
+
+            <div class="table-wrap">
+              <table class="payroll-table">
+                <thead>
+                  <tr>
+                    <th><input type="checkbox" id="checkAll" /></th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Pay Days</th>
+                    <th>Basic</th>
+                    <th>Allowances</th>
+                    <th>Bonus</th>
+                    <th>Overtime</th>
+                    <th>Other Earn</th>
+                    <th>Tax</th>
+                    <th>PF</th>
+                    <th>Loan</th>
+                    <th>Other Deduct</th>
+                    <th>Gross</th>
+                    <th>Net</th>
+                    <th>Payment</th>
+                    <th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody id="payrollBody">
+                  <tr><td colspan="18" class="empty">Loading payroll data...</td></tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="5">Totals</td>
+                    <td id="tBasic" class="money">BDT 0</td>
+                    <td id="tAllow" class="money">BDT 0</td>
+                    <td id="tBonus" class="money">BDT 0</td>
+                    <td id="tOvertime" class="money">BDT 0</td>
+                    <td id="tOtherEarn" class="money">BDT 0</td>
+                    <td id="tTax" class="money">BDT 0</td>
+                    <td id="tPf" class="money">BDT 0</td>
+                    <td id="tLoan" class="money">BDT 0</td>
+                    <td id="tOtherDed" class="money">BDT 0</td>
+                    <td id="tGross" class="money">BDT 0</td>
+                    <td id="tNet" class="money">BDT 0</td>
+                    <td colspan="2" id="tRows" class="money">0 rows</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      const state = {
+        employees: [],
+        filtered: [],
+        selected: new Set(),
+        currentRun: null,
+        rowMap: {}
+      };
+
+      const dom = {
+        monthInput: document.getElementById('monthInput'),
+        departmentFilter: document.getElementById('departmentFilter'),
+        statusFilter: document.getElementById('statusFilter'),
+        paymentFilter: document.getElementById('paymentFilter'),
+        searchInput: document.getElementById('searchInput'),
+        taxInput: document.getElementById('taxInput'),
+        pfInput: document.getElementById('pfInput'),
+        workingDaysInput: document.getElementById('workingDaysInput'),
+        checkAll: document.getElementById('checkAll'),
+        body: document.getElementById('payrollBody'),
+        statusLine: document.getElementById('statusLine'),
+        kpiEmployees: document.getElementById('kpiEmployees'),
+        kpiGross: document.getElementById('kpiGross'),
+        kpiDeduction: document.getElementById('kpiDeduction'),
+        kpiNet: document.getElementById('kpiNet'),
+        kpiPaid: document.getElementById('kpiPaid'),
+        kpiPending: document.getElementById('kpiPending')
+      };
+
+      function fmtMoney(v) {
+        const n = Number(v || 0);
+        return `BDT ${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+      }
+
+      function nowMonth() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      }
+
+      function normalizeEmployee(item) {
+        const first = (item.employeeFirstName || '').trim();
+        const last = (item.employeeLastName || '').trim();
+        const name = `${first} ${last}`.trim() || 'Unnamed';
+        const numericEmployeeId = Number(item.employeeDbId || item.id || 0);
+        return {
+          employeeId: Number.isFinite(numericEmployeeId) && numericEmployeeId > 0
+            ? numericEmployeeId
+            : (Number((item.employeeId || '').toString().replace(/[^0-9]/g, '')) || 0),
+          employeeCode: item.employeeCode || item.employeeId || '',
+          name,
+          department: item.employeeDepartment || 'N/A',
+          designation: item.employeeDesignation || 'N/A',
+          employeeStatus: item.employeeStatus || 'Active',
+          phone: item.employeePhone || '',
+          basicSalary: Number(item.employeeSalary || 0),
+          houseAllowance: Number(item.employeeHouseAllowance || 0),
+          medicalAllowance: Number(item.employeeMedicalAllowance || 0),
+          transportAllowance: Number(item.employeeTransportAllowance || 0)
+        };
+      }
+
+      function defaultRow(employee) {
+        return {
+          employeeId: employee.employeeId,
+          employeeCode: employee.employeeCode,
+          name: employee.name,
+          department: employee.department,
+          designation: employee.designation,
+          employeeStatus: employee.employeeStatus,
+          phone: employee.phone,
+          payableDays: Number(dom.workingDaysInput.value || 30),
+          basicSalary: employee.basicSalary,
+          houseAllowance: employee.houseAllowance,
+          medicalAllowance: employee.medicalAllowance,
+          transportAllowance: employee.transportAllowance,
+          bonusAmount: 0,
+          overtimeAmount: 0,
+          otherEarning: 0,
+          loanAmount: 0,
+          otherDeduction: 0,
+          paymentStatus: 'Pending',
+          remarks: ''
+        };
+      }
+
+      function calc(row) {
+        const workingDays = Math.max(1, Number(dom.workingDaysInput.value || 30));
+        const taxPercent = Math.max(0, Number(dom.taxInput.value || 0));
+        const pfPercent = Math.max(0, Number(dom.pfInput.value || 0));
+
+        const payableDays = Math.max(0, Math.min(workingDays, Number(row.payableDays || 0)));
+        const factor = workingDays > 0 ? (payableDays / workingDays) : 1;
+
+        const basic = Number(row.basicSalary || 0);
+        const house = Number(row.houseAllowance || 0);
+        const medical = Number(row.medicalAllowance || 0);
+        const transport = Number(row.transportAllowance || 0);
+
+        const pBasic = basic * factor;
+        const pHouse = house * factor;
+        const pMedical = medical * factor;
+        const pTransport = transport * factor;
+
+        const bonus = Number(row.bonusAmount || 0);
+        const overtime = Number(row.overtimeAmount || 0);
+        const otherEarn = Number(row.otherEarning || 0);
+        const loan = Number(row.loanAmount || 0);
+        const otherDed = Number(row.otherDeduction || 0);
+
+        const allowance = pHouse + pMedical + pTransport;
+        const gross = pBasic + allowance + bonus + overtime + otherEarn;
+        const tax = (pBasic * taxPercent) / 100;
+        const pf = (pBasic * pfPercent) / 100;
+        const totalDed = tax + pf + loan + otherDed;
+        const net = Math.max(0, gross - totalDed);
+
+        return { payableDays, pBasic, allowance, gross, tax, pf, totalDed, net, bonus, overtime, otherEarn, loan, otherDed };
+      }
+
+      function statusClass(status) {
+        const key = (status || 'Pending').toLowerCase();
+        if (key === 'paid') return 'paid';
+        if (key === 'hold') return 'hold';
+        if (key === 'processed') return 'processed';
+        return 'pending';
+      }
+
+      function syncDepartments() {
+        const all = Array.from(new Set(state.employees.map((e) => e.department).filter(Boolean))).sort();
+        const current = dom.departmentFilter.value || 'all';
+        dom.departmentFilter.innerHTML = '<option value="all">All</option>';
+        all.forEach((dept) => {
+          const opt = document.createElement('option');
+          opt.value = dept;
+          opt.textContent = dept;
+          dom.departmentFilter.appendChild(opt);
+        });
+        if (Array.from(dom.departmentFilter.options).some((o) => o.value === current)) {
+          dom.departmentFilter.value = current;
+        }
+      }
+
+      function applyFilters() {
+        const dept = dom.departmentFilter.value;
+        const empStatus = dom.statusFilter.value;
+        const payStatus = dom.paymentFilter.value;
+        const search = (dom.searchInput.value || '').trim().toLowerCase();
+
+        state.filtered = state.employees.filter((employee) => {
+          const row = state.rowMap[employee.employeeId];
+          if (!row) return false;
+
+          if (dept !== 'all' && employee.department !== dept) return false;
+          if (empStatus !== 'all' && employee.employeeStatus !== empStatus) return false;
+          if (payStatus !== 'all' && (row.paymentStatus || 'Pending') !== payStatus) return false;
+
+          if (search) {
+            const hay = `${employee.name} ${employee.employeeCode} ${employee.phone}`.toLowerCase();
+            if (!hay.includes(search)) return false;
+          }
+          return true;
+        });
+
+        renderTable();
+        dom.statusLine.textContent = `Showing ${state.filtered.length} employee(s) for ${dom.monthInput.value}.`;
+      }
+
+      function renderTable() {
+        if (!state.filtered.length) {
+          dom.body.innerHTML = '<tr><td colspan="18" class="empty">No employee matched payroll filters.</td></tr>';
+          updateTotals([]);
+          return;
+        }
+
+        const html = state.filtered.map((employee, idx) => {
+          const row = state.rowMap[employee.employeeId];
+          const pay = calc(row);
+          return `
+            <tr style="animation: rise ${220 + idx * 10}ms ease-out;">
+              <td><input type="checkbox" data-check="${employee.employeeId}" ${state.selected.has(employee.employeeId) ? 'checked' : ''}></td>
+              <td class="employee-cell">
+                <p class="name">${employee.name}</p>
+                <p class="meta">${employee.employeeCode} � ${employee.phone || 'No phone'}</p>
+              </td>
+              <td>${employee.department}</td>
+              <td>${employee.designation}</td>
+              <td><input class="row-input" type="number" min="0" step="1" data-field="payableDays" data-id="${employee.employeeId}" value="${Math.round(Number(row.payableDays || 0))}"></td>
+              <td class="money">${fmtMoney(pay.pBasic)}</td>
+              <td class="money">${fmtMoney(pay.allowance)}</td>
+              <td><input class="row-input" type="number" min="0" step="0.01" data-field="bonusAmount" data-id="${employee.employeeId}" value="${Number(row.bonusAmount || 0)}"></td>
+              <td><input class="row-input" type="number" min="0" step="0.01" data-field="overtimeAmount" data-id="${employee.employeeId}" value="${Number(row.overtimeAmount || 0)}"></td>
+              <td><input class="row-input" type="number" min="0" step="0.01" data-field="otherEarning" data-id="${employee.employeeId}" value="${Number(row.otherEarning || 0)}"></td>
+              <td class="money">${fmtMoney(pay.tax)}</td>
+              <td class="money">${fmtMoney(pay.pf)}</td>
+              <td><input class="row-input" type="number" min="0" step="0.01" data-field="loanAmount" data-id="${employee.employeeId}" value="${Number(row.loanAmount || 0)}"></td>
+              <td><input class="row-input" type="number" min="0" step="0.01" data-field="otherDeduction" data-id="${employee.employeeId}" value="${Number(row.otherDeduction || 0)}"></td>
+              <td class="money">${fmtMoney(pay.gross)}</td>
+              <td class="money">${fmtMoney(pay.net)}</td>
+              <td>
+                <span class="pill ${statusClass(row.paymentStatus)}">${row.paymentStatus || 'Pending'}</span>
+                <select class="row-select" data-field="paymentStatus" data-id="${employee.employeeId}">
+                  <option ${row.paymentStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                  <option ${row.paymentStatus === 'Processed' ? 'selected' : ''}>Processed</option>
+                  <option ${row.paymentStatus === 'Paid' ? 'selected' : ''}>Paid</option>
+                  <option ${row.paymentStatus === 'Hold' ? 'selected' : ''}>Hold</option>
+                </select>
+              </td>
+              <td><input class="row-input" data-field="remarks" data-id="${employee.employeeId}" value="${(row.remarks || '').replace(/"/g, '&quot;')}"></td>
+            </tr>
+          `;
+        }).join('');
+
+        dom.body.innerHTML = html;
+        updateTotals(state.filtered);
+      }
+
+      function updateTotals(rows) {
+        let gross = 0;
+        let ded = 0;
+        let net = 0;
+        let basic = 0;
+        let allow = 0;
+        let bonus = 0;
+        let overtime = 0;
+        let otherEarn = 0;
+        let tax = 0;
+        let pf = 0;
+        let loan = 0;
+        let otherDed = 0;
+        let paid = 0;
+        let pending = 0;
+
+        rows.forEach((e) => {
+          const row = state.rowMap[e.employeeId];
+          const pay = calc(row);
+          gross += pay.gross;
+          ded += pay.totalDed;
+          net += pay.net;
+          basic += pay.pBasic;
+          allow += pay.allowance;
+          bonus += pay.bonus;
+          overtime += pay.overtime;
+          otherEarn += pay.otherEarn;
+          tax += pay.tax;
+          pf += pay.pf;
+          loan += pay.loan;
+          otherDed += pay.otherDed;
+          if ((row.paymentStatus || 'Pending') === 'Paid') paid++;
+          else pending++;
+        });
+
+        dom.kpiEmployees.textContent = rows.length;
+        dom.kpiGross.textContent = fmtMoney(gross);
+        dom.kpiDeduction.textContent = fmtMoney(ded);
+        dom.kpiNet.textContent = fmtMoney(net);
+        dom.kpiPaid.textContent = paid;
+        dom.kpiPending.textContent = pending;
+
+        document.getElementById('tBasic').textContent = fmtMoney(basic);
+        document.getElementById('tAllow').textContent = fmtMoney(allow);
+        document.getElementById('tBonus').textContent = fmtMoney(bonus);
+        document.getElementById('tOvertime').textContent = fmtMoney(overtime);
+        document.getElementById('tOtherEarn').textContent = fmtMoney(otherEarn);
+        document.getElementById('tTax').textContent = fmtMoney(tax);
+        document.getElementById('tPf').textContent = fmtMoney(pf);
+        document.getElementById('tLoan').textContent = fmtMoney(loan);
+        document.getElementById('tOtherDed').textContent = fmtMoney(otherDed);
+        document.getElementById('tGross').textContent = fmtMoney(gross);
+        document.getElementById('tNet').textContent = fmtMoney(net);
+        document.getElementById('tRows').textContent = `${rows.length} rows`;
+
+        const ids = rows.map((r) => r.employeeId);
+        dom.checkAll.checked = ids.length > 0 && ids.every((id) => state.selected.has(id));
+      }
+
+      async function loadEmployees() {
+        const res = await fetch('backend/public/employees/list_payroll.php', {
+          method: 'GET',
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || data.ok === false) {
+          throw new Error((data && data.message) || 'Failed to load employees.');
+        }
+
+        state.employees = (Array.isArray(data.employees) ? data.employees : [])
+          .map(normalizeEmployee)
+          .filter((e) => e.employeeId > 0);
+
+        state.rowMap = {};
+        state.employees.forEach((e) => {
+          state.rowMap[e.employeeId] = defaultRow(e);
+        });
+
+        syncDepartments();
+      }
+
+      async function loadRun() {
+        const month = dom.monthInput.value;
+        const res = await fetch(`backend/public/payroll/list.php?month=${encodeURIComponent(month)}`, {
+          method: 'GET',
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || data.ok === false) {
+          throw new Error((data && data.message) || 'Failed to load payroll run.');
+        }
+
+        state.currentRun = data.run || null;
+        const items = Array.isArray(data.items) ? data.items : [];
+
+        if (state.currentRun) {
+          dom.workingDaysInput.value = Number(state.currentRun.workingDays || dom.workingDaysInput.value || 30);
+          dom.taxInput.value = Number(state.currentRun.taxPercent || dom.taxInput.value || 5);
+          dom.pfInput.value = Number(state.currentRun.pfPercent || dom.pfInput.value || 3);
+        }
+
+        items.forEach((item) => {
+          const id = Number(item.employeeId || 0);
+          if (!id || !state.rowMap[id]) return;
+          const row = state.rowMap[id];
+          row.payableDays = Number(item.payableDays || row.payableDays);
+          row.bonusAmount = Number(item.bonusAmount || 0);
+          row.overtimeAmount = Number(item.overtimeAmount || 0);
+          row.otherEarning = Number(item.otherEarning || 0);
+          row.loanAmount = Number(item.loanAmount || 0);
+          row.otherDeduction = Number(item.otherDeduction || 0);
+          row.paymentStatus = item.paymentStatus || 'Pending';
+          row.remarks = item.remarks || '';
+        });
+      }
+
+      async function reloadAll() {
+        dom.statusLine.textContent = 'Loading employees and payroll run...';
+        await loadEmployees();
+        await loadRun();
+        applyFilters();
+      }
+
+      function collectPayloadRows() {
+        const targets = state.selected.size
+          ? state.filtered.filter((e) => state.selected.has(e.employeeId))
+          : state.filtered;
+
+        return targets.map((e) => {
+          const row = state.rowMap[e.employeeId];
+          return {
+            employeeId: e.employeeId,
+            payableDays: Number(row.payableDays || 0),
+            bonusAmount: Number(row.bonusAmount || 0),
+            overtimeAmount: Number(row.overtimeAmount || 0),
+            otherEarning: Number(row.otherEarning || 0),
+            loanAmount: Number(row.loanAmount || 0),
+            otherDeduction: Number(row.otherDeduction || 0),
+            paymentStatus: row.paymentStatus || 'Pending',
+            remarks: row.remarks || ''
+          };
+        });
+      }
+
+      async function processPayroll() {
+        const items = collectPayloadRows();
+        if (!items.length) {
+          alert('No employees selected/filtered for payroll processing.');
+          return;
+        }
+
+        const payload = {
+          payrollMonth: dom.monthInput.value,
+          workingDays: Number(dom.workingDaysInput.value || 30),
+          taxPercent: Number(dom.taxInput.value || 0),
+          pfPercent: Number(dom.pfInput.value || 0),
+          items
+        };
+
+        const res = await fetch('backend/public/payroll/process.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || data.ok === false) {
+          alert((data && data.message) || 'Failed to process payroll.');
+          return;
+        }
+
+        dom.statusLine.textContent = `Payroll processed for ${data.savedCount || items.length} employee(s).`;
+        await loadRun();
+        applyFilters();
+      }
+
+      async function markFilteredPaid() {
+        const targets = state.selected.size
+          ? state.filtered.filter((e) => state.selected.has(e.employeeId)).map((e) => e.employeeId)
+          : state.filtered.map((e) => e.employeeId);
+
+        if (!targets.length) {
+          alert('No employees selected/filtered to mark paid.');
+          return;
+        }
+
+        const res = await fetch('backend/public/payroll/mark_paid.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            payrollMonth: dom.monthInput.value,
+            paymentStatus: 'Paid',
+            employeeIds: targets
+          })
+        });
+
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || data.ok === false) {
+          alert((data && data.message) || 'Failed to update payment status.');
+          return;
+        }
+
+        dom.statusLine.textContent = `Marked ${data.updatedCount || 0} employee(s) as Paid.`;
+        await loadRun();
+        applyFilters();
+      }
+
+      function exportExcel() {
+        if (!window.XLSX) {
+          alert('Excel library not loaded.');
+          return;
+        }
+
+        const rows = state.filtered.map((e) => {
+          const row = state.rowMap[e.employeeId];
+          const pay = calc(row);
+          return {
+            Month: dom.monthInput.value,
+            Employee_Code: e.employeeCode,
+            Employee_Name: e.name,
+            Department: e.department,
+            Designation: e.designation,
+            Employee_Status: e.employeeStatus,
+            Payable_Days: Number(pay.payableDays || 0),
+            Basic: Number(pay.pBasic.toFixed(2)),
+            Allowance: Number(pay.allowance.toFixed(2)),
+            Bonus: Number(pay.bonus.toFixed(2)),
+            Overtime: Number(pay.overtime.toFixed(2)),
+            Other_Earning: Number(pay.otherEarn.toFixed(2)),
+            Tax: Number(pay.tax.toFixed(2)),
+            PF: Number(pay.pf.toFixed(2)),
+            Loan: Number(pay.loan.toFixed(2)),
+            Other_Deduction: Number(pay.otherDed.toFixed(2)),
+            Gross: Number(pay.gross.toFixed(2)),
+            Net: Number(pay.net.toFixed(2)),
+            Payment_Status: row.paymentStatus || 'Pending',
+            Remarks: row.remarks || ''
+          };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Payroll');
+        XLSX.writeFile(wb, `payroll_${dom.monthInput.value || nowMonth()}.xlsx`);
+      }
+
+      async function persistRowPaymentStatus(employeeId, paymentStatus) {
+        const row = state.rowMap[employeeId];
+        if (!row) {
+          throw new Error('Payroll row not found for selected employee.');
+        }
+
+        const markPaidRes = await fetch('backend/public/payroll/mark_paid.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            payrollMonth: dom.monthInput.value,
+            paymentStatus,
+            employeeIds: [employeeId]
+          })
+        });
+
+        const markPaidData = await markPaidRes.json().catch(() => null);
+        const markPaidUpdated = Number((markPaidData && markPaidData.updatedCount) || 0);
+        if (markPaidRes.ok && markPaidData && markPaidData.ok !== false && markPaidUpdated > 0) {
+          return;
+        }
+
+        const markPaidMessage = (markPaidData && markPaidData.message) || '';
+        const needsRunCreate =
+          markPaidRes.status === 404 ||
+          /no payroll run found/i.test(markPaidMessage) ||
+          (markPaidRes.ok && markPaidUpdated === 0);
+        if (!needsRunCreate) {
+          throw new Error(markPaidMessage || 'Failed to update payment status.');
+        }
+
+        const processRes = await fetch('backend/public/payroll/process.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            payrollMonth: dom.monthInput.value,
+            workingDays: Number(dom.workingDaysInput.value || 30),
+            taxPercent: Number(dom.taxInput.value || 0),
+            pfPercent: Number(dom.pfInput.value || 0),
+            items: [{
+              employeeId,
+              payableDays: Number(row.payableDays || 0),
+              bonusAmount: Number(row.bonusAmount || 0),
+              overtimeAmount: Number(row.overtimeAmount || 0),
+              otherEarning: Number(row.otherEarning || 0),
+              loanAmount: Number(row.loanAmount || 0),
+              otherDeduction: Number(row.otherDeduction || 0),
+              paymentStatus,
+              remarks: row.remarks || ''
+            }]
+          })
+        });
+
+        const processData = await processRes.json().catch(() => null);
+        if (!processRes.ok || !processData || processData.ok === false) {
+          throw new Error((processData && processData.message) || 'Failed to create payroll run and persist payment status.');
+        }
+      }
+
+      async function onRowInput(event) {
+        const el = event.target;
+        const id = Number(el.getAttribute('data-id') || 0);
+        const field = el.getAttribute('data-field');
+        if (!id || !field || !state.rowMap[id]) return;
+
+        if (field === 'paymentStatus') {
+          // Persist payment status only once on change event.
+          if (event.type !== 'change') {
+            return;
+          }
+
+          const previousValue = state.rowMap[id][field] || 'Pending';
+          state.rowMap[id][field] = el.value;
+          renderTable();
+
+          try {
+            dom.statusLine.textContent = `Updating payment status for employee ${id}...`;
+            await persistRowPaymentStatus(id, state.rowMap[id][field]);
+            await loadRun();
+            applyFilters();
+            dom.statusLine.textContent = `Payment status updated for employee ${id}.`;
+          } catch (error) {
+            state.rowMap[id][field] = previousValue;
+            renderTable();
+            dom.statusLine.textContent = error.message || 'Failed to update payment status.';
+            alert(error.message || 'Failed to update payment status.');
+          }
+          return;
+        }
+
+        if (field === 'remarks') {
+          state.rowMap[id][field] = el.value;
+        } else {
+          state.rowMap[id][field] = Math.max(0, Number(el.value || 0));
+        }
+
+        renderTable();
+      }
+
+      function onCheck(event) {
+        const el = event.target;
+        const id = Number(el.getAttribute('data-check') || 0);
+        if (!id) return;
+        if (el.checked) state.selected.add(id);
+        else state.selected.delete(id);
+        updateTotals(state.filtered);
+      }
+
+      function bindEvents() {
+        [
+          dom.monthInput,
+          dom.departmentFilter,
+          dom.statusFilter,
+          dom.paymentFilter,
+          dom.searchInput,
+          dom.taxInput,
+          dom.pfInput,
+          dom.workingDaysInput
+        ].forEach((el) => {
+          el.addEventListener('input', applyFilters);
+          el.addEventListener('change', () => {
+            if (el === dom.monthInput) {
+              loadRun().then(applyFilters).catch((error) => {
+                dom.statusLine.textContent = error.message;
+              });
+              return;
+            }
+            applyFilters();
+          });
+        });
+
+        dom.checkAll.addEventListener('change', (event) => {
+          if (event.target.checked) {
+            state.filtered.forEach((e) => state.selected.add(e.employeeId));
+          } else {
+            state.filtered.forEach((e) => state.selected.delete(e.employeeId));
+          }
+          renderTable();
+        });
+
+        dom.body.addEventListener('input', (event) => {
+          if (event.target.matches('[data-field]')) onRowInput(event);
+          if (event.target.matches('[data-check]')) onCheck(event);
+        });
+        dom.body.addEventListener('change', (event) => {
+          if (event.target.matches('[data-field]')) onRowInput(event);
+          if (event.target.matches('[data-check]')) onCheck(event);
+        });
+
+        document.getElementById('btnRefresh').addEventListener('click', () => {
+          reloadAll().catch((error) => {
+            dom.statusLine.textContent = error.message;
+            dom.body.innerHTML = `<tr><td colspan="18" class="empty">${error.message}</td></tr>`;
+          });
+        });
+        document.getElementById('btnProcess').addEventListener('click', () => {
+          processPayroll().catch((error) => {
+            alert(error.message || 'Failed to process payroll.');
+          });
+        });
+        document.getElementById('btnPayAll').addEventListener('click', () => {
+          markFilteredPaid().catch((error) => {
+            alert(error.message || 'Failed to mark paid.');
+          });
+        });
+        document.getElementById('btnExport').addEventListener('click', exportExcel);
+      }
+
+      dom.monthInput.value = nowMonth();
+      bindEvents();
+      reloadAll().catch((error) => {
+        dom.statusLine.textContent = error.message;
+        dom.body.innerHTML = `<tr><td colspan="18" class="empty">${error.message}</td></tr>`;
+      });
+    </script>
+  </body>
+</html>
+
+
+
+

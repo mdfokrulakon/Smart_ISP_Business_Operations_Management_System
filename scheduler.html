@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - Scheduler</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      :root {
+        --sc-bg-a: #f4f8fa;
+        --sc-bg-b: #e8eef2;
+        --sc-ink: #132734;
+        --sc-muted: #61727f;
+        --sc-accent: #0f7e90;
+        --sc-accent-2: #cf5f2c;
+      }
+
+      .sc-shell {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        padding: 20px;
+        background:
+          radial-gradient(circle at 8% 12%, rgba(15, 126, 144, 0.16), transparent 30%),
+          radial-gradient(circle at 92% 0%, rgba(207, 95, 44, 0.12), transparent 29%),
+          linear-gradient(165deg, var(--sc-bg-a), var(--sc-bg-b));
+      }
+
+      .sc-shell::before,
+      .sc-shell::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+      }
+
+      .sc-shell::before {
+        width: 240px;
+        height: 240px;
+        top: -80px;
+        right: -70px;
+        background: rgba(207, 95, 44, 0.14);
+        animation: scFloatA 12s ease-in-out infinite;
+      }
+
+      .sc-shell::after {
+        width: 200px;
+        height: 200px;
+        left: -60px;
+        bottom: -70px;
+        background: rgba(15, 126, 144, 0.15);
+        animation: scFloatB 15s ease-in-out infinite;
+      }
+
+      .content-header,
+      .stats-grid,
+      .card {
+        position: relative;
+        z-index: 1;
+      }
+
+      .content-header h1 { color: var(--sc-ink); }
+      .content-header p { color: var(--sc-muted); }
+
+      .stats-grid .stat-card {
+        border-radius: 14px;
+        color: #fff !important;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      }
+      .stats-grid .stat-card:nth-child(1) { background: linear-gradient(135deg, #0f5e74, #148ea0) !important; }
+      .stats-grid .stat-card:nth-child(2) { background: linear-gradient(135deg, #8f5a0a, #bc7a17) !important; }
+      .stats-grid .stat-card:nth-child(3) { background: linear-gradient(135deg, #29608f, #3f7ec4) !important; }
+      .stats-grid .stat-card:nth-child(4) { background: linear-gradient(135deg, #0f6d3c, #189255) !important; }
+      .stats-grid .stat-card .stat-info,
+      .stats-grid .stat-card .stat-info h3,
+      .stats-grid .stat-card .stat-info p,
+      .stats-grid .stat-card .stat-icon {
+        color: #fff !important;
+      }
+      .stats-grid .stat-card .stat-icon {
+        background: rgba(255, 255, 255, 0.2) !important;
+      }
+
+      .card {
+        border-radius: 14px;
+        border: 1px solid rgba(19, 39, 52, 0.08);
+        box-shadow: 0 10px 32px rgba(5, 16, 26, 0.08);
+        opacity: 0;
+        transform: translateY(14px);
+        animation: scCardIn 0.45s ease forwards;
+      }
+
+      .card:nth-of-type(2) { animation-delay: 0.08s; }
+      .card:nth-of-type(3) { animation-delay: 0.13s; }
+      .card:nth-of-type(4) { animation-delay: 0.18s; }
+
+      .scheduler-top-grid {
+        display: grid;
+        grid-template-columns: 1.08fr 1fr;
+        gap: 14px;
+      }
+
+      .calendar-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .calendar-controls h4 {
+        margin: 0;
+        color: var(--sc-ink);
+        letter-spacing: 0.2px;
+      }
+
+      .mini-calendar {
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid rgba(19, 39, 52, 0.1);
+        padding: 10px;
+      }
+
+      .calendar-weekdays,
+      .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .calendar-weekdays div {
+        text-align: center;
+        font-size: 11px;
+        color: #6a7a87;
+        font-weight: 700;
+      }
+
+      .day {
+        min-height: 52px;
+        border-radius: 10px;
+        background: #f7fafc;
+        border: 1px solid rgba(19, 39, 52, 0.08);
+        padding: 5px 6px;
+        font-size: 12px;
+        color: #355060;
+        cursor: pointer;
+        transition: transform 0.18s ease, border-color 0.18s ease;
+      }
+
+      .day:hover {
+        transform: translateY(-1px);
+        border-color: #7bb4c1;
+      }
+
+      .day.other-month { opacity: 0.5; }
+      .day.today {
+        border-color: #0f7e90;
+        background: #dcf3f7;
+        font-weight: 700;
+      }
+
+      .day .dot {
+        margin-top: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 18px;
+        border-radius: 999px;
+        font-size: 10px;
+        color: #fff;
+        background: #cf5f2c;
+      }
+
+      .schedule-list {
+        max-height: 450px;
+        overflow: auto;
+        padding-right: 4px;
+      }
+
+      .schedule-item {
+        display: grid;
+        grid-template-columns: 90px 1fr auto;
+        gap: 10px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid rgba(19, 39, 52, 0.1);
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+
+      .schedule-time {
+        font-weight: 700;
+        color: #0f7e90;
+        font-size: 13px;
+      }
+
+      .schedule-details h4 {
+        margin: 0 0 4px;
+        color: #162f3c;
+      }
+
+      .schedule-details p {
+        margin: 0 0 3px;
+        color: #60717f;
+        font-size: 12px;
+      }
+
+      .status-badge {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+      }
+
+      .status-badge.pending { background: #ffe6bb; color: #865108; }
+      .status-badge.scheduled { background: #cdeff7; color: #0f5f74; }
+      .status-badge.in_progress { background: #dcd5ff; color: #4939a3; }
+      .status-badge.completed { background: #cff0db; color: #0e6a39; }
+      .status-badge.cancelled { background: #ffd6d4; color: #931f1c; }
+      .status-badge.available { background: #cff0db; color: #0e6a39; }
+      .status-badge.busy { background: #ffd6d4; color: #931f1c; }
+
+      .appointment-form .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .appointment-form label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .appointment-form input,
+      .appointment-form select,
+      .appointment-form textarea {
+        width: 100%;
+        border: 1px solid rgba(19, 39, 52, 0.2);
+        border-radius: 10px;
+        padding: 10px 11px;
+        background: #fff;
+      }
+
+      .appointment-form input:focus,
+      .appointment-form select:focus,
+      .appointment-form textarea:focus {
+        border-color: #0f7e90;
+        box-shadow: 0 0 0 3px rgba(15, 126, 144, 0.2);
+        outline: none;
+      }
+
+      .inline-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .technician-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 10px;
+      }
+
+      .technician-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid rgba(19, 39, 52, 0.1);
+        padding: 12px;
+      }
+
+      .technician-info { display: flex; gap: 9px; }
+      .technician-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: #d6edf2;
+        color: #0f7e90;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .empty-note {
+        border: 1px dashed rgba(19, 39, 52, 0.2);
+        border-radius: 12px;
+        background: #f8fafb;
+        padding: 18px;
+        text-align: center;
+        color: #63717c;
+      }
+
+      .page-msg {
+        font-size: 13px;
+        margin: 0;
+      }
+
+      @keyframes scCardIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes scFloatA {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-10px, 16px); }
+      }
+
+      @keyframes scFloatB {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(12px, -11px); }
+      }
+
+      @media (max-width: 1024px) {
+        .scheduler-top-grid { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 768px) {
+        .sc-shell { padding: 12px; border-radius: 12px; }
+        .appointment-form .form-row { grid-template-columns: 1fr; }
+        .schedule-item { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+    <div class="main-content">
+      <div class="page-content">
+        <div class="sc-shell">
+        <div class="content-header">
+          <h1>
+            <i class="fa-solid fa-calendar-days"></i> Appointment Scheduler
+          </h1>
+          <p>Manage client appointments and technician schedules</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="statToday">0</h3>
+              <p>Today's Appointments</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="statPending">0</h3>
+              <p>Pending Requests</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="statTech">0</h3>
+              <p>Available Technicians</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-route"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="statCompleted">0</h3>
+              <p>Completed Appointments</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="scheduler-top-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-calendar"></i> Calendar View</h3>
+              <div class="card-actions">
+                <button class="btn btn-sm btn-navy" type="button" id="openFormBtn">
+                  <i class="fa-solid fa-plus"></i> New Appointment
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="calendar-controls">
+                <button class="btn btn-navy" type="button" id="prevMonthBtn">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h4 id="calendarMonthLabel">Month</h4>
+                <button class="btn btn-navy" type="button" id="nextMonthBtn">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+
+              <div class="mini-calendar">
+                <div class="calendar-weekdays">
+                  <div>Sun</div>
+                  <div>Mon</div>
+                  <div>Tue</div>
+                  <div>Wed</div>
+                  <div>Thu</div>
+                  <div>Fri</div>
+                  <div>Sat</div>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-clock"></i> Today's Schedule</h3>
+            </div>
+            <div class="card-body">
+              <div id="todayScheduleList" class="schedule-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>
+              <i class="fa-solid fa-calendar-plus"></i> Schedule New Appointment
+            </h3>
+            <small id="schedulerAccessText">Checking permissions...</small>
+          </div>
+          <div class="card-body">
+            <form class="appointment-form" id="appointmentForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="request-id">Schedule From New Request</label>
+                  <select id="request-id">
+                    <option value="">Select a pending/scheduled request</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <div class="inline-actions">
+                    <button type="button" class="btn btn-navy" id="refreshRequestsBtn"><i class="fa-solid fa-rotate"></i> Refresh Requests</button>
+                    <button type="button" class="btn btn-navy" id="clearRequestLinkBtn"><i class="fa-solid fa-link-slash"></i> Manual Entry</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="client-name">Client Name *</label>
+                  <input type="text" id="client-name" required placeholder="Enter client name" />
+                </div>
+                <div class="form-group">
+                  <label for="client-phone">Client Phone *</label>
+                  <input type="text" id="client-phone" required placeholder="Enter phone" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="client-address">Address *</label>
+                  <input type="text" id="client-address" required placeholder="Enter service address" />
+                </div>
+                <div class="form-group">
+                  <label for="appointment-type">Appointment Type *</label>
+                  <select id="appointment-type" required>
+                    <option value="">Select Type</option>
+                    <option value="installation">New Installation</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="troubleshooting">Troubleshooting</option>
+                    <option value="upgrade">Equipment Upgrade</option>
+                    <option value="disconnection">Disconnection</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="appointment-date">Date *</label>
+                  <input type="date" id="appointment-date" required />
+                </div>
+                <div class="form-group">
+                  <label for="appointment-time">Time Slot *</label>
+                  <select id="appointment-time" required>
+                    <option value="">Select Time</option>
+                    <option value="09:00">09:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="14:00">02:00 PM</option>
+                    <option value="15:00">03:00 PM</option>
+                    <option value="16:00">04:00 PM</option>
+                    <option value="17:00">05:00 PM</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="technician">Assigned Technician *</label>
+                  <select id="technician-id" required>
+                    <option value="">Select Technician</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="priority">Priority Level</label>
+                  <select id="priority">
+                    <option value="normal">Normal</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="emergency">Emergency</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="appointment-notes">Notes</label>
+                <textarea
+                  id="appointment-notes"
+                  rows="3"
+                  placeholder="Special instructions or requirements..."
+                ></textarea>
+              </div>
+
+              <div class="form-actions">
+                <p id="schedulerFormMessage" class="page-msg"></p>
+                <button type="submit" class="btn btn-primary btn-navy" id="scheduleSubmitBtn">
+                  <i class="fa-solid fa-calendar-check"></i> Schedule
+                  Appointment
+                </button>
+                <button type="reset" class="btn btn-secondary btn-navy">
+                  <i class="fa-solid fa-undo"></i> Clear Form
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>
+              <i class="fa-solid fa-user-tie"></i> Technician Availability
+            </h3>
+          </div>
+          <div class="card-body">
+            <div id="technicianGrid" class="technician-grid"></div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      const state = {
+        monthCursor: new Date(),
+        monthAppointments: [],
+        todayAppointments: [],
+        requestOptions: [],
+        technicians: [],
+        canCreate: false,
+        canUpdateStatus: false,
+      };
+
+      const calendarMonthLabel = document.getElementById('calendarMonthLabel');
+      const calendarDays = document.getElementById('calendarDays');
+      const todayScheduleList = document.getElementById('todayScheduleList');
+      const technicianGrid = document.getElementById('technicianGrid');
+      const requestIdSelect = document.getElementById('request-id');
+      const technicianIdSelect = document.getElementById('technician-id');
+      const appointmentForm = document.getElementById('appointmentForm');
+      const scheduleSubmitBtn = document.getElementById('scheduleSubmitBtn');
+      const schedulerFormMessage = document.getElementById('schedulerFormMessage');
+      const schedulerAccessText = document.getElementById('schedulerAccessText');
+
+      function monthKey(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        return y + '-' + m;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text == null ? '' : String(text);
+        return div.innerHTML;
+      }
+
+      function fmtType(type) {
+        const map = {
+          installation: 'New Installation',
+          maintenance: 'Maintenance',
+          troubleshooting: 'Troubleshooting',
+          upgrade: 'Equipment Upgrade',
+          disconnection: 'Disconnection',
+        };
+        return map[type] || type || '-';
+      }
+
+      function fmtTime(timeVal) {
+        if (!timeVal) return '-';
+        const t = String(timeVal).substring(0, 5);
+        const [hhStr, mm] = t.split(':');
+        const hh = Number(hhStr || 0);
+        const ampm = hh >= 12 ? 'PM' : 'AM';
+        const hour12 = hh % 12 || 12;
+        return String(hour12).padStart(2, '0') + ':' + (mm || '00') + ' ' + ampm;
+      }
+
+      function setFormMessage(text, isError = false) {
+        schedulerFormMessage.textContent = text;
+        schedulerFormMessage.style.color = isError ? '#b42318' : '#0f6f3e';
+      }
+
+      function setFormEnabled(enabled) {
+        const fields = appointmentForm.querySelectorAll('input, select, textarea, button');
+        fields.forEach((field) => {
+          field.disabled = !enabled;
+        });
+        schedulerAccessText.textContent = enabled ? 'You can create appointments' : 'View-only access (cannot create appointments)';
+        schedulerAccessText.style.color = enabled ? '#0f6f3e' : '#b42318';
+      }
+
+      function renderCalendar() {
+        const current = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth(), 1);
+        calendarMonthLabel.textContent = current.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+        const firstWeekDay = current.getDay();
+        const daysInMonth = new Date(current.getFullYear(), current.getMonth() + 1, 0).getDate();
+        const prevMonthDays = new Date(current.getFullYear(), current.getMonth(), 0).getDate();
+
+        const counts = {};
+        state.monthAppointments.forEach((a) => {
+          const key = a.appointment_date;
+          counts[key] = (counts[key] || 0) + 1;
+        });
+
+        const todayIso = new Date().toISOString().split('T')[0];
+        const cells = [];
+
+        for (let i = firstWeekDay - 1; i >= 0; i -= 1) {
+          const d = prevMonthDays - i;
+          cells.push('<div class="day other-month">' + d + '</div>');
+        }
+
+        for (let d = 1; d <= daysInMonth; d += 1) {
+          const iso = monthKey(current) + '-' + String(d).padStart(2, '0');
+          const isToday = iso === todayIso;
+          const badge = counts[iso] ? '<div class="dot">' + counts[iso] + '</div>' : '';
+          cells.push('<div class="day ' + (isToday ? 'today' : '') + '">' + d + badge + '</div>');
+        }
+
+        const needed = Math.ceil(cells.length / 7) * 7;
+        let nextDay = 1;
+        while (cells.length < needed) {
+          cells.push('<div class="day other-month">' + nextDay + '</div>');
+          nextDay += 1;
+        }
+
+        calendarDays.innerHTML = cells.join('');
+      }
+
+      function renderTodaySchedule() {
+        if (!state.todayAppointments.length) {
+          todayScheduleList.innerHTML = '<div class="empty-note">No appointments for today</div>';
+          return;
+        }
+
+        todayScheduleList.innerHTML = state.todayAppointments.map((item) => {
+          const statusOptions = ['pending', 'scheduled', 'in_progress', 'completed', 'cancelled'].map((s) => {
+            return '<option value="' + s + '" ' + (item.status === s ? 'selected' : '') + '>' + s.replace('_', ' ') + '</option>';
+          }).join('');
+
+          const statusEditor = state.canUpdateStatus
+            ? '<div style="display:flex;gap:6px;align-items:center;">'
+                + '<select data-status-id="' + item.id + '" style="padding:6px;border-radius:8px;border:1px solid #d2d9de;font-size:12px;">' + statusOptions + '</select>'
+                + '<button type="button" class="btn btn-sm btn-navy" data-save-status-id="' + item.id + '">Save</button>'
+              + '</div>'
+            : '<span class="status-badge ' + item.status + '">' + item.status.replace('_', ' ') + '</span>';
+
+          return (
+            '<div class="schedule-item">'
+              + '<div class="schedule-time">' + fmtTime(item.appointment_time) + '</div>'
+              + '<div class="schedule-details">'
+                + '<h4>' + escapeHtml(fmtType(item.appointment_type)) + '</h4>'
+                + '<p><i class="fa-solid fa-user"></i> ' + escapeHtml(item.client_name) + '</p>'
+                + '<p><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(item.client_address || '-') + '</p>'
+                + '<p><i class="fa-solid fa-user-tie"></i> Tech: ' + escapeHtml(item.technician_name || '-') + '</p>'
+              + '</div>'
+              + '<div class="schedule-status">' + statusEditor + '</div>'
+            + '</div>'
+          );
+        }).join('');
+      }
+
+      function renderRequestOptions() {
+        const base = '<option value="">Select a pending/scheduled request</option>';
+        if (!state.requestOptions.length) {
+          requestIdSelect.innerHTML = base;
+          return;
+        }
+        requestIdSelect.innerHTML = base + state.requestOptions.map((r) => {
+          return '<option value="' + r.id + '">' + escapeHtml(r.request_code + ' - ' + r.client_name + ' (' + r.phone + ')') + '</option>';
+        }).join('');
+      }
+
+      function renderTechnicians() {
+        technicianIdSelect.innerHTML = '<option value="">Select Technician</option>';
+        if (!state.technicians.length) {
+          technicianGrid.innerHTML = '<div class="empty-note">No support technician found. Add technicians from Employee module.</div>';
+          return;
+        }
+
+        state.technicians.forEach((t) => {
+          const opt = document.createElement('option');
+          opt.value = String(t.id);
+          opt.textContent = t.full_name + ' (' + t.position_name + ')';
+          technicianIdSelect.appendChild(opt);
+        });
+
+        technicianGrid.innerHTML = state.technicians.map((t) => {
+          return (
+            '<div class="technician-card">'
+              + '<div class="technician-info">'
+                + '<div class="technician-avatar"><i class="fa-solid fa-user-tie"></i></div>'
+                + '<div class="technician-details">'
+                  + '<h4 style="margin:0 0 2px;">' + escapeHtml(t.full_name) + '</h4>'
+                  + '<p style="margin:0 0 5px;color:#60717f;font-size:12px;">' + escapeHtml(t.position_name || 'Technician') + '</p>'
+                  + '<div class="technician-status"><span class="status-badge ' + t.availability + '">' + t.availability + '</span></div>'
+                + '</div>'
+              + '</div>'
+              + '<div class="technician-schedule" style="margin-top:8px;color:#5f6d77;font-size:12px;">'
+                + '<p style="margin:0 0 2px;"><strong>Today:</strong> ' + t.today_assigned + ' appointments</p>'
+                + '<p style="margin:0;"><strong>Contact:</strong> ' + escapeHtml(t.phone || '-') + '</p>'
+              + '</div>'
+            + '</div>'
+          );
+        }).join('');
+      }
+
+      function renderStats(stats) {
+        document.getElementById('statToday').textContent = String(stats.today_appointments || 0);
+        document.getElementById('statPending').textContent = String(stats.pending_schedule || 0);
+        document.getElementById('statTech').textContent = String(stats.available_technicians || 0);
+        document.getElementById('statCompleted').textContent = String(stats.completed_appointments || 0);
+      }
+
+      async function loadSchedulerData() {
+        const month = monthKey(state.monthCursor);
+        const res = await fetch('backend/public/support/scheduler_list.php?month=' + encodeURIComponent(month), { credentials: 'same-origin' });
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message || 'Failed to load scheduler');
+        }
+
+        state.monthAppointments = data.month_appointments || [];
+        state.todayAppointments = data.today_appointments || [];
+        state.requestOptions = data.request_options || [];
+        state.technicians = data.technicians || [];
+        state.canCreate = Boolean(data.can_create);
+        state.canUpdateStatus = Boolean(data.can_update_status);
+
+        renderStats(data.stats || {});
+        renderCalendar();
+        renderTodaySchedule();
+        renderRequestOptions();
+        renderTechnicians();
+        setFormEnabled(state.canCreate);
+      }
+
+      function setFieldsFromRequest(requestId) {
+        const req = state.requestOptions.find((r) => String(r.id) === String(requestId));
+        if (!req) return;
+        document.getElementById('client-name').value = req.client_name || '';
+        document.getElementById('client-phone').value = req.phone || '';
+        document.getElementById('client-address').value = req.address_line || '';
+        const typeSelect = document.getElementById('appointment-type');
+        typeSelect.value = 'installation';
+        if (req.preferred_date) {
+          document.getElementById('appointment-date').value = req.preferred_date;
+        }
+        if (req.preferred_time === 'morning') {
+          document.getElementById('appointment-time').value = '09:00';
+        } else if (req.preferred_time === 'afternoon') {
+          document.getElementById('appointment-time').value = '14:00';
+        } else if (req.preferred_time === 'evening') {
+          document.getElementById('appointment-time').value = '16:00';
+        }
+      }
+
+      async function submitAppointment(event) {
+        event.preventDefault();
+        if (!state.canCreate) {
+          setFormMessage('You do not have permission to create appointments.', true);
+          return;
+        }
+
+        const payload = {
+          request_id: requestIdSelect.value ? Number(requestIdSelect.value) : null,
+          client_name: document.getElementById('client-name').value.trim(),
+          client_phone: document.getElementById('client-phone').value.trim(),
+          client_address: document.getElementById('client-address').value.trim(),
+          appointment_type: document.getElementById('appointment-type').value,
+          appointment_date: document.getElementById('appointment-date').value,
+          appointment_time: document.getElementById('appointment-time').value,
+          technician_employee_id: Number(document.getElementById('technician-id').value || 0),
+          priority: document.getElementById('priority').value,
+          notes: document.getElementById('appointment-notes').value.trim(),
+        };
+
+        scheduleSubmitBtn.disabled = true;
+        const oldText = scheduleSubmitBtn.innerHTML;
+        scheduleSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Scheduling...';
+        setFormMessage('Scheduling appointment...', false);
+
+        try {
+          const res = await fetch('backend/public/support/scheduler_create.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            setFormMessage(data.message || 'Failed to create appointment', true);
+            return;
+          }
+
+          appointmentForm.reset();
+          setFormMessage('Appointment scheduled successfully', false);
+          await loadSchedulerData();
+        } catch (error) {
+          setFormMessage('Network error while scheduling appointment', true);
+        } finally {
+          scheduleSubmitBtn.disabled = false;
+          scheduleSubmitBtn.innerHTML = oldText;
+        }
+      }
+
+      async function saveAppointmentStatus(appointmentId, status) {
+        const res = await fetch('backend/public/support/scheduler_update_status.php', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appointment_id: appointmentId, status }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          setFormMessage(data.message || 'Failed to update status', true);
+          return;
+        }
+        setFormMessage('Appointment status updated', false);
+        await loadSchedulerData();
+      }
+
+      document.getElementById('prevMonthBtn').addEventListener('click', async () => {
+        state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth() - 1, 1);
+        await loadSchedulerData();
+      });
+
+      document.getElementById('nextMonthBtn').addEventListener('click', async () => {
+        state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth() + 1, 1);
+        await loadSchedulerData();
+      });
+
+      document.getElementById('openFormBtn').addEventListener('click', () => {
+        document.getElementById('request-id').focus();
+      });
+
+      document.getElementById('refreshRequestsBtn').addEventListener('click', loadSchedulerData);
+      document.getElementById('clearRequestLinkBtn').addEventListener('click', () => {
+        requestIdSelect.value = '';
+      });
+
+      requestIdSelect.addEventListener('change', (event) => {
+        const id = event.target.value;
+        if (id) {
+          setFieldsFromRequest(id);
+        }
+      });
+
+      todayScheduleList.addEventListener('click', async (event) => {
+        const saveBtn = event.target.closest('[data-save-status-id]');
+        if (!saveBtn) return;
+        const id = Number(saveBtn.getAttribute('data-save-status-id'));
+        const select = todayScheduleList.querySelector('[data-status-id="' + id + '"]');
+        if (!select) return;
+        await saveAppointmentStatus(id, select.value);
+      });
+
+      appointmentForm.addEventListener('submit', submitAppointment);
+      document.getElementById('appointment-date').setAttribute('min', new Date().toISOString().split('T')[0]);
+
+      (async function initScheduler() {
+        try {
+          await loadSchedulerData();
+        } catch (error) {
+          setFormEnabled(false);
+          setFormMessage(error.message || 'Failed to initialize scheduler', true);
+          todayScheduleList.innerHTML = '<div class="empty-note">Failed to load scheduler data</div>';
+          technicianGrid.innerHTML = '<div class="empty-note">Failed to load technician data</div>';
+        }
+      })();
+    </script>
+  </body>
+</html>
+
+
+
+

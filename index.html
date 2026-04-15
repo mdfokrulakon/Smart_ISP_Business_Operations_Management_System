@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>Promee Internet - Dashboard</title>
+    <style>
+      :root {
+        --bg-1: #f6f8fc;
+        --bg-2: #eef3ff;
+        --ink: #142742;
+        --soft: #60738f;
+        --line: #d9e3f5;
+        --glass: rgba(255, 255, 255, 0.82);
+        --brand: #0f5bd7;
+        --brand-2: #1f86ff;
+      }
+
+      .dashboard-home {
+        min-height: calc(100vh - 70px);
+        padding: 16px;
+        font-family: 'Manrope', sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 8% 7%, rgba(16, 91, 215, 0.16), transparent 28%),
+          radial-gradient(circle at 88% 10%, rgba(33, 197, 151, 0.12), transparent 30%),
+          linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      }
+
+      .home-shell {
+        max-width: 1520px;
+        margin: 0 auto;
+        display: grid;
+        gap: 14px;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: linear-gradient(120deg, #fff, #ebf3ff);
+        box-shadow: 0 18px 36px rgba(28, 60, 124, 0.13);
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+      }
+
+      .hero::before {
+        content: '';
+        position: absolute;
+        width: 380px;
+        height: 380px;
+        right: -120px;
+        top: -170px;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, rgba(31, 134, 255, 0.22), transparent 70%);
+      }
+
+      .hero::after {
+        content: '';
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        left: -90px;
+        bottom: -130px;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, rgba(17, 121, 92, 0.22), transparent 70%);
+      }
+
+      .hero-main,
+      .hero-side {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-title {
+        margin: 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+        line-height: 1.1;
+      }
+
+      .hero-sub {
+        margin: 8px 0 0;
+        color: var(--soft);
+        max-width: 760px;
+        line-height: 1.65;
+      }
+
+      .hero-tags {
+        margin-top: 14px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 8px 11px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: rgba(15, 91, 215, 0.1);
+        color: #19478f;
+        border: 1px solid rgba(15, 91, 215, 0.16);
+      }
+
+      .hero-side {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .pulse-card {
+        border: 1px solid #d7e4fb;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 12px;
+      }
+
+      .pulse-card .label {
+        color: var(--soft);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 800;
+      }
+
+      .pulse-card .value {
+        margin-top: 7px;
+        font-weight: 800;
+        font-size: 1.25rem;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.18s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn.primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        box-shadow: 0 10px 20px rgba(15, 91, 215, 0.24);
+      }
+
+      .btn.secondary {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+      }
+
+      .stat-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(6, minmax(140px, 1fr));
+      }
+
+      .stat-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 13px;
+        color: #fff;
+        box-shadow: 0 12px 26px rgba(20, 39, 66, 0.16);
+        position: relative;
+        overflow: hidden;
+        animation: rise 460ms ease both;
+      }
+
+      .stat-card::before {
+        content: '';
+        position: absolute;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        right: -46px;
+        top: -56px;
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .stat-card p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.76rem;
+        font-weight: 700;
+      }
+
+      .stat-card h2 {
+        margin: 10px 0 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.95rem;
+        line-height: 1;
+      }
+
+      .stat-card i {
+        position: absolute;
+        right: 14px;
+        bottom: 12px;
+        opacity: 0.36;
+        font-size: 1.5rem;
+      }
+
+      .grad-a { background: linear-gradient(135deg, #0f5bd7, #1f86ff); }
+      .grad-b { background: linear-gradient(135deg, #d74d70, #ff7b85); }
+      .grad-c { background: linear-gradient(135deg, #0f906a, #3fd99c); }
+      .grad-d { background: linear-gradient(135deg, #bc5f11, #ffb332); }
+      .grad-e { background: linear-gradient(135deg, #546680, #8ea7cc); }
+      .grad-f { background: linear-gradient(135deg, #7855d8, #b692ff); }
+
+      .layout-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 1.35fr 1fr;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--glass);
+        box-shadow: 0 12px 24px rgba(25, 49, 89, 0.08);
+        backdrop-filter: blur(8px);
+      }
+
+      .panel-head {
+        padding: 14px;
+        border-bottom: 1px solid #e0e9f8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .panel-head h2 {
+        margin: 0;
+        font-size: 1.02rem;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+
+      .panel-body {
+        padding: 14px;
+      }
+
+      .insight-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .insight {
+        border: 1px solid #dce7f9;
+        border-radius: 12px;
+        background: #fff;
+        padding: 12px;
+      }
+
+      .insight .label {
+        color: var(--soft);
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        font-weight: 800;
+      }
+
+      .insight .value {
+        margin-top: 8px;
+        font-size: 1.4rem;
+        font-weight: 800;
+      }
+
+      .ops-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .ops-card {
+        border: 1px solid #dce7f9;
+        border-radius: 12px;
+        background: #fff;
+        padding: 12px;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .ops-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 20px rgba(18, 43, 84, 0.12);
+      }
+
+      .ops-card h3 {
+        margin: 0 0 6px;
+        font-size: 0.94rem;
+      }
+
+      .ops-card p {
+        margin: 0;
+        color: var(--soft);
+        font-size: 0.82rem;
+      }
+
+      .ops-card a {
+        margin-top: 8px;
+        display: inline-flex;
+        gap: 6px;
+        color: var(--brand);
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-decoration: none;
+      }
+
+      .bill-table-wrap {
+        overflow: auto;
+      }
+
+      .bill-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+      }
+
+      .bill-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #edf3ff;
+        color: #2c4d7e;
+        text-align: left;
+        padding: 10px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-bottom: 1px solid #cfdef5;
+      }
+
+      .bill-table tbody td {
+        padding: 10px;
+        border-bottom: 1px solid #e6eefb;
+        font-size: 0.85rem;
+      }
+
+      .due-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 5px 10px;
+        background: #fff4de;
+        color: #946210;
+        font-weight: 700;
+        font-size: 0.76rem;
+      }
+
+      .critical {
+        background: #ffe8e6;
+        color: #ad2d25;
+      }
+
+      .search-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 20, 40, 0.52);
+        z-index: 1200;
+        padding: 18px;
+      }
+
+      .search-sheet {
+        max-width: 1200px;
+        margin: 3% auto;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        padding: 16px;
+        max-height: 88vh;
+        overflow-y: auto;
+      }
+
+      .search-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .search-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+
+      .search-card {
+        border: 1px solid #dce7f9;
+        border-radius: 10px;
+        padding: 12px;
+      }
+
+      .status-tag {
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .status-active {
+        background: #e1f8ed;
+        color: #13754f;
+      }
+
+      .welcome-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: radial-gradient(circle at 20% 20%, rgba(31, 134, 255, 0.32), rgba(11, 26, 53, 0.82));
+        backdrop-filter: blur(5px);
+        transition: opacity 420ms ease, visibility 420ms ease;
+      }
+
+      .welcome-overlay.hide {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .welcome-card {
+        width: min(950px, 98vw);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        background:
+          radial-gradient(circle at 85% 15%, rgba(255, 104, 148, 0.28), transparent 42%),
+          radial-gradient(circle at 12% 84%, rgba(71, 238, 193, 0.24), transparent 40%),
+          linear-gradient(130deg, rgba(6, 24, 55, 0.92), rgba(11, 57, 126, 0.88));
+        color: #fff;
+        box-shadow: 0 28px 62px rgba(1, 8, 23, 0.56);
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+        animation: welcomePop 700ms cubic-bezier(.21,.79,.26,1.05);
+      }
+
+      .welcome-card::before,
+      .welcome-card::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(1px);
+        animation: drift 7s ease-in-out infinite;
+      }
+
+      .welcome-card::before {
+        width: 190px;
+        height: 190px;
+        right: -34px;
+        top: -64px;
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .welcome-card::after {
+        width: 140px;
+        height: 140px;
+        left: -32px;
+        bottom: -44px;
+        background: rgba(95, 255, 207, 0.2);
+      }
+
+      .welcome-title {
+        margin: 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(1.8rem, 4.6vw, 3.1rem);
+        line-height: 1.12;
+        letter-spacing: 0.01em;
+      }
+
+      .welcome-sub {
+        margin: 10px 0 0;
+        color: rgba(233, 242, 255, 0.92);
+        max-width: 760px;
+        line-height: 1.7;
+        font-size: 0.98rem;
+      }
+
+      .welcome-points {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .welcome-point {
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 13px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 0.84rem;
+      }
+
+      .welcome-actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .welcome-btn {
+        border-radius: 999px;
+        padding: 10px 16px;
+        border: 0;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .welcome-btn.primary {
+        background: linear-gradient(135deg, #57e4bb, #28c0ff);
+        color: #042845;
+      }
+
+      .welcome-btn.secondary {
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+      }
+
+      .fade-in {
+        animation: rise 500ms ease both;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes welcomePop {
+        from {
+          opacity: 0;
+          transform: scale(0.93) translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      @keyframes drift {
+        0%, 100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      @media (max-width: 1200px) {
+        .hero,
+        .layout-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stat-grid {
+          grid-template-columns: repeat(3, minmax(140px, 1fr));
+        }
+      }
+
+      @media (max-width: 760px) {
+        .dashboard-home {
+          padding: 10px;
+        }
+
+        .welcome-card {
+          padding: 18px;
+        }
+
+        .welcome-points {
+          grid-template-columns: 1fr;
+        }
+
+        .stat-grid,
+        .insight-grid,
+        .ops-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+    <div class="main-content">
+      <div class="page-content dashboard-home">
+        <div class="home-shell fade-in">
+          <section class="hero">
+            <div class="hero-main">
+              <h1 class="hero-title"><i class="fa-solid fa-chart-line"></i> ISP Operations Command Center</h1>
+              <p class="hero-sub">Unified home page for employee management, customer billing, network support, HR operations, and service continuity. All teams get a real-time pulse from one dashboard.</p>
+              <div class="hero-tags">
+                <span class="tag"><i class="fa-solid fa-users"></i> Workforce visibility</span>
+                <span class="tag"><i class="fa-solid fa-money-bills"></i> Collection focus</span>
+                <span class="tag"><i class="fa-solid fa-triangle-exclamation"></i> Expiry alerts</span>
+                <span class="tag"><i class="fa-solid fa-satellite-dish"></i> ISP operations</span>
+              </div>
+            </div>
+            <div class="hero-side">
+              <div class="pulse-card">
+                <div class="label">Current Date</div>
+                <div class="value" id="todayDate">-</div>
+              </div>
+              <div class="pulse-card">
+                <div class="label">Next 7-Day Due Bills</div>
+                <div class="value" id="dueCount">0</div>
+              </div>
+              <div class="toolbar">
+                <button class="btn secondary" type="button" onclick="loadDashboardStats()"><i class="fa-solid fa-rotate"></i> Refresh Live Data</button>
+                <button class="btn primary" type="button" onclick="window.location.href='new_request.html'"><i class="fa-solid fa-plus"></i> New Request</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="stat-grid">
+            <article class="stat-card grad-a"><p>Total Clients</p><h2 id="totalClientsCount">-</h2><i class="fa-solid fa-users"></i></article>
+            <article class="stat-card grad-b"><p>New Clients (30 Days)</p><h2 id="newClientsCount">-</h2><i class="fa-solid fa-user-plus"></i></article>
+            <article class="stat-card grad-c"><p>Paid Clients</p><h2 id="paidClientsCount">-</h2><i class="fa-solid fa-circle-check"></i></article>
+            <article class="stat-card grad-d"><p>Unpaid Clients</p><h2 id="unpaidClientsCount">-</h2><i class="fa-solid fa-clock"></i></article>
+            <article class="stat-card grad-e"><p>Left Clients</p><h2 id="leftClientsCount">-</h2><i class="fa-solid fa-arrow-right-from-bracket"></i></article>
+            <article class="stat-card grad-f"><p>Revenue (30 Days)</p><h2 id="totalRevenueCount">BDT -</h2><i class="fa-solid fa-money-bill-trend-up"></i></article>
+          </section>
+
+          <section class="layout-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <h2><i class="fa-solid fa-bell"></i> Bill Expiry Notifications (Due within 7 days)</h2>
+                <span class="tag" id="billStatusTag"><i class="fa-solid fa-circle-info"></i> Loading...</span>
+              </div>
+              <div class="panel-body">
+                <div class="bill-table-wrap" id="billExpiryContainer">
+                  <table class="bill-table">
+                    <thead>
+                      <tr>
+                        <th>Client Code</th>
+                        <th>Client Name</th>
+                        <th>Invoice No</th>
+                        <th>Amount</th>
+                        <th>Due Date</th>
+                        <th>Remaining</th>
+                      </tr>
+                    </thead>
+                    <tbody id="billExpiryTable">
+                      <tr><td colspan="6" style="text-align:center; padding:20px; color:#6b7f99;">Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h2><i class="fa-solid fa-chart-pie"></i> Operational Insights</h2>
+              </div>
+              <div class="panel-body">
+                <div class="insight-grid">
+                  <div class="insight">
+                    <div class="label">Collection Efficiency</div>
+                    <div class="value" id="collectionEfficiency">0%</div>
+                  </div>
+                  <div class="insight">
+                    <div class="label">Outstanding Exposure</div>
+                    <div class="value" id="outstandingExposure">0</div>
+                  </div>
+                  <div class="insight">
+                    <div class="label">Due in 48 Hours</div>
+                    <div class="value" id="dueSoonCount">0</div>
+                  </div>
+                  <div class="insight">
+                    <div class="label">Total Due Amount</div>
+                    <div class="value" id="dueAmount">BDT 0.00</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2><i class="fa-solid fa-layer-group"></i> Employee-Management ISP Feature Hub</h2>
+            </div>
+            <div class="panel-body">
+              <div class="ops-grid">
+                <div class="ops-card"><h3><i class="fa-solid fa-id-badge"></i> HR and Payroll</h3><p>Employee lifecycle, department-position mapping, payroll, payslip, resignations, and policy governance.</p><a href="employee_list.html">Open Employee List <i class="fa-solid fa-arrow-right"></i></a></div>
+                <div class="ops-card"><h3><i class="fa-solid fa-calendar-check"></i> Attendance and Leave</h3><p>Daily attendance controls, leave requests, approvals, and availability planning for operations continuity.</p><a href="daily_attendance.html">Open Attendance <i class="fa-solid fa-arrow-right"></i></a></div>
+                <div class="ops-card"><h3><i class="fa-solid fa-screwdriver-wrench"></i> Support and Ticketing</h3><p>Ticket intake, escalation visibility, support-team handling, and SLA-oriented service restoration flow.</p><a href="ticket_list.html">Open Ticket List <i class="fa-solid fa-arrow-right"></i></a></div>
+                <div class="ops-card"><h3><i class="fa-solid fa-hand-holding-dollar"></i> Billing and Income</h3><p>Invoice pipeline, collections, due tracking, payment channels, and income analytics with reconciliation.</p><a href="billing.html">Open Billing <i class="fa-solid fa-arrow-right"></i></a></div>
+                <div class="ops-card"><h3><i class="fa-solid fa-boxes-stacked"></i> Purchase, Inventory, Assets</h3><p>Procurement operations, stock movement, asset assignment, and equipment accountability by role.</p><a href="inventory.html">Open Inventory <i class="fa-solid fa-arrow-right"></i></a></div>
+                <div class="ops-card"><h3><i class="fa-solid fa-user-shield"></i> Client and Service Control</h3><p>Client onboarding, package updates, change/new requests, service history, and portal lifecycle operations.</p><a href="client_list.html">Open Client List <i class="fa-solid fa-arrow-right"></i></a></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div id="searchModal" class="search-modal">
+          <div class="search-sheet">
+            <div class="search-head">
+              <h2 style="margin:0; font-family:'Space Grotesk', sans-serif;">Search Results</h2>
+              <button onclick="closeSearchModal()" class="btn secondary"><i class="fa-solid fa-xmark"></i> Close</button>
+            </div>
+            <div id="searchResults" class="search-grid"></div>
+          </div>
+        </div>
+
+        <div id="welcomeOverlay" class="welcome-overlay" role="dialog" aria-label="Welcome">
+          <div class="welcome-card">
+            <h2 class="welcome-title">Welcome to Promee Internet Employee Management Portal</h2>
+            <p class="welcome-sub">This home page connects your teams through one live operational view. Track billing risk, client growth, support pulse, and workforce management with faster action and better clarity.</p>
+            <div class="welcome-points">
+              <div class="welcome-point"><i class="fa-solid fa-users"></i> Employee and department-driven operations visibility</div>
+              <div class="welcome-point"><i class="fa-solid fa-bell"></i> 7-day bill expiry notifications with urgency tracking</div>
+              <div class="welcome-point"><i class="fa-solid fa-screwdriver-wrench"></i> Quick access to support, billing, inventory, HR, and client workflows</div>
+            </div>
+            <div class="welcome-actions">
+              <button type="button" class="welcome-btn primary" id="welcomeEnterBtn"><i class="fa-solid fa-rocket"></i> Enter Dashboard</button>
+              <button type="button" class="welcome-btn secondary" id="welcomeSkipBtn"><i class="fa-solid fa-forward"></i> Skip Intro</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      async function checkAuth() {
+        try {
+          const response = await fetch('backend/public/auth/me.php', {
+            credentials: 'same-origin'
+          });
+          if (!response.ok) {
+            window.location.href = 'login.html';
+          }
+        } catch (error) {
+          console.error('Auth check failed:', error);
+        }
+      }
+
+      function formatMoney(value) {
+        return Number(value || 0).toLocaleString('en-BD', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      function daysUntil(dateText) {
+        const now = new Date();
+        const due = new Date(dateText + 'T00:00:00');
+        const diff = due.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        return Math.ceil(diff / (1000 * 60 * 60 * 24));
+      }
+
+      function setTodayDate() {
+        const now = new Date();
+        document.getElementById('todayDate').textContent = now.toLocaleDateString('en-BD', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+
+      async function loadDashboardStats() {
+        try {
+          const response = await fetch('backend/public/dashboard/stats.php', {
+            credentials: 'same-origin'
+          });
+          const data = await response.json();
+          if (!response.ok || !data || data.ok === false) return;
+
+          const stats = data.stats || {};
+          document.getElementById('totalClientsCount').textContent = Number(stats.totalClients || 0);
+          document.getElementById('newClientsCount').textContent = Number(stats.newClients || 0);
+          document.getElementById('paidClientsCount').textContent = Number(stats.paidClients || 0);
+          document.getElementById('unpaidClientsCount').textContent = Number(stats.unpaidClients || 0);
+          document.getElementById('leftClientsCount').textContent = Number(stats.leftClients || 0);
+          document.getElementById('totalRevenueCount').textContent = 'BDT ' + formatMoney(stats.totalRevenue || 0);
+
+          const totalClients = Number(stats.totalClients || 0);
+          const paidClients = Number(stats.paidClients || 0);
+          const unpaidClients = Number(stats.unpaidClients || 0);
+          const efficiency = totalClients > 0 ? Math.round((paidClients / totalClients) * 100) : 0;
+
+          document.getElementById('collectionEfficiency').textContent = efficiency + '%';
+          document.getElementById('outstandingExposure').textContent = unpaidClients.toLocaleString('en-BD');
+
+          const notifications = Array.isArray(data.billExpiryNotifications) ? data.billExpiryNotifications : [];
+          const tbody = document.getElementById('billExpiryTable');
+
+          let dueSoonCount = 0;
+          let dueAmount = 0;
+          notifications.forEach((item) => {
+            const remainingDays = daysUntil(item.due_date);
+            if (remainingDays <= 2) dueSoonCount += 1;
+            dueAmount += Number(item.amount || 0);
+          });
+
+          document.getElementById('dueSoonCount').textContent = String(dueSoonCount);
+          document.getElementById('dueAmount').textContent = 'BDT ' + formatMoney(dueAmount);
+          document.getElementById('dueCount').textContent = String(notifications.length);
+          document.getElementById('billStatusTag').innerHTML = notifications.length
+            ? '<i class="fa-solid fa-triangle-exclamation"></i> ' + notifications.length + ' attention item(s)'
+            : '<i class="fa-solid fa-circle-check"></i> No urgent dues';
+
+          if (notifications.length > 0) {
+            tbody.innerHTML = notifications.map((notification) => {
+              const remainingDays = daysUntil(notification.due_date);
+              const pillClass = remainingDays <= 2 ? 'due-pill critical' : 'due-pill';
+              const remainingText = remainingDays < 0 ? 'Overdue' : remainingDays + ' day(s)';
+              return `
+                <tr>
+                  <td>${escapeHtml(notification.client_code)}</td>
+                  <td>${escapeHtml(notification.full_name)}</td>
+                  <td>${escapeHtml(notification.invoice_no)}</td>
+                  <td>BDT ${formatMoney(notification.amount)}</td>
+                  <td><span class="due-pill">${new Date(notification.due_date).toLocaleDateString('en-BD')}</span></td>
+                  <td><span class="${pillClass}">${remainingText}</span></td>
+                </tr>
+              `;
+            }).join('');
+          } else {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:22px; color:#7388a6;">No bills expiring within the next 7 days.</td></tr>';
+          }
+        } catch (error) {
+          console.error('Failed to load dashboard stats:', error);
+        }
+      }
+
+      const searchInput = document.querySelector('input[placeholder="Search Customer"]');
+      let searchTimeout;
+
+      if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+          clearTimeout(searchTimeout);
+          const query = e.target.value.trim();
+
+          if (query.length < 2) {
+            document.getElementById('searchModal').style.display = 'none';
+            return;
+          }
+
+          searchTimeout = setTimeout(() => performSearch(query), 300);
+        });
+      }
+
+      async function performSearch(query) {
+        try {
+          const response = await fetch(`backend/public/dashboard/search.php?q=${encodeURIComponent(query)}`, {
+            credentials: 'same-origin'
+          });
+          const data = await response.json();
+
+          if (data.ok && data.results.length > 0) {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = data.results.map(client => `
+              <div class="search-card">
+                <h3 style="margin:0 0 8px;">${escapeHtml(client.full_name)}</h3>
+                <p style="margin:4px 0; color:#60738f; font-size:13px;"><strong>Code:</strong> ${escapeHtml(client.client_code)}</p>
+                <p style="margin:4px 0; color:#60738f; font-size:13px;"><strong>Phone:</strong> ${escapeHtml(client.phone)}</p>
+                <p style="margin:4px 0; color:#60738f; font-size:13px;"><strong>Email:</strong> ${escapeHtml(client.email)}</p>
+                <p style="margin:4px 0; color:#60738f; font-size:13px;"><strong>Package:</strong> ${escapeHtml(client.package_name || 'N/A')}</p>
+                <p style="margin:4px 0; color:#60738f; font-size:13px;"><strong>Status:</strong> <span class="status-tag status-active">${escapeHtml(client.status)}</span></p>
+              </div>
+            `).join('');
+
+            document.getElementById('searchModal').style.display = 'block';
+          } else {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #7086a3;">No results found</div>';
+            document.getElementById('searchModal').style.display = 'block';
+          }
+        } catch (error) {
+          console.error('Search failed:', error);
+        }
+      }
+
+      function closeSearchModal() {
+        document.getElementById('searchModal').style.display = 'none';
+        if (searchInput) {
+          searchInput.value = '';
+        }
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function initWelcomeOverlay() {
+        const overlay = document.getElementById('welcomeOverlay');
+        const enterBtn = document.getElementById('welcomeEnterBtn');
+        const skipBtn = document.getElementById('welcomeSkipBtn');
+        if (!overlay) return;
+
+        const closeOverlay = () => {
+          overlay.classList.add('hide');
+        };
+
+        if (enterBtn) {
+          enterBtn.addEventListener('click', closeOverlay);
+        }
+        if (skipBtn) {
+          skipBtn.addEventListener('click', closeOverlay);
+        }
+
+        setTimeout(closeOverlay, 5200);
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        setTodayDate();
+        checkAuth();
+        initWelcomeOverlay();
+        loadDashboardStats();
+      });
+
+      setInterval(loadDashboardStats, 30000);
+    </script>
+  </body>
+</html>

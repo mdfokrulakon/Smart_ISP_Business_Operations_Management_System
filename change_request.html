@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - Change Request</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      :root {
+        --cr-bg-a: #f6f3ee;
+        --cr-bg-b: #e9e4db;
+        --cr-ink: #11232d;
+        --cr-muted: #5f6d76;
+      }
+      .cr-shell {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        padding: 20px;
+        background:
+          radial-gradient(circle at 8% 11%, rgba(205, 96, 46, 0.14), transparent 30%),
+          radial-gradient(circle at 92% 0%, rgba(13, 126, 140, 0.14), transparent 28%),
+          linear-gradient(170deg, var(--cr-bg-a), var(--cr-bg-b));
+      }
+      .cr-shell::before,
+      .cr-shell::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+      }
+      .cr-shell::before { width: 220px; height: 220px; right: -65px; top: -82px; background: rgba(205, 96, 46, 0.14); }
+      .cr-shell::after { width: 180px; height: 180px; left: -58px; bottom: -72px; background: rgba(13, 126, 140, 0.14); }
+      .content-header,
+      .stats-grid,
+      .card { position: relative; z-index: 1; }
+      .content-header h1 { color: var(--cr-ink); }
+      .content-header p { color: var(--cr-muted); }
+      .stats-grid .stat-card { color: #fff !important; border-radius: 14px; }
+      .stats-grid .stat-card:nth-child(1) { background: linear-gradient(135deg, #7b5007, #a86d0f) !important; }
+      .stats-grid .stat-card:nth-child(2) { background: linear-gradient(135deg, #20608a, #347eb3) !important; }
+      .stats-grid .stat-card:nth-child(3) { background: linear-gradient(135deg, #0f7341, #1a9858) !important; }
+      .stats-grid .stat-card:nth-child(4) { background: linear-gradient(135deg, #0b6c7a, #0f8e9f) !important; }
+      .stats-grid .stat-card .stat-icon,
+      .stats-grid .stat-card .stat-info,
+      .stats-grid .stat-card .stat-info h3,
+      .stats-grid .stat-card .stat-info p { color: #fff !important; }
+      .stats-grid .stat-card .stat-icon { background: rgba(255,255,255,0.2) !important; }
+      .card { border-radius: 14px; border: 1px solid rgba(17, 35, 45, 0.08); box-shadow: 0 12px 32px rgba(10, 19, 28, 0.08); }
+      .cr-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 14px; }
+      .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .search-results { position: absolute; top: 100%; left: 0; right: 0; border: 1px solid #d3dbe1; border-radius: 8px; background: #fff; max-height: 250px; overflow: auto; display: none; z-index: 30; }
+      .search-results.active { display: block; }
+      .search-item { padding: 9px 10px; border-bottom: 1px solid #edf1f4; cursor: pointer; }
+      .search-item:hover { background: #f7fafc; }
+      .request-list { max-height: 370px; overflow: auto; }
+      .request-item { border: 1px solid #e4e9ee; border-radius: 12px; padding: 10px; background: #fff; margin-bottom: 10px; }
+      .status-badge { border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 700; text-transform: capitalize; }
+      .status-badge.pending { background: #ffe7bd; color: #86520a; }
+      .status-badge.in_progress { background: #ddd7ff; color: #4b3aa4; }
+      .status-badge.scheduled { background: #cceff7; color: #0f5f74; }
+      .status-badge.completed { background: #cff0db; color: #0e6a39; }
+      .status-badge.cancelled, .status-badge.rejected { background: #ffd9d6; color: #8f1d1b; }
+      .priority-badge { border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 700; text-transform: capitalize; }
+      .priority-badge.normal { background: #ecf0f3; color: #41525d; }
+      .priority-badge.urgent { background: #ffe7bd; color: #86520a; }
+      .priority-badge.emergency { background: #ffd9d6; color: #8f1d1b; }
+      .table-responsive { overflow: auto; }
+      .page-msg { font-size: 13px; margin: 0; }
+      .row-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 8px;
+        min-width: 320px;
+      }
+      .row-actions select,
+      .row-actions input {
+        min-width: 0;
+        height: 34px;
+      }
+      .row-actions input {
+        padding: 8px 10px;
+      }
+      .row-actions .btn {
+        height: 34px;
+        white-space: nowrap;
+        padding: 0 12px;
+        justify-content: center;
+      }
+      @media (max-width: 1024px) { .cr-grid { grid-template-columns: 1fr; } }
+      @media (max-width: 768px) {
+        .cr-shell { padding: 12px; border-radius: 12px; }
+        .form-row { grid-template-columns: 1fr; }
+        .row-actions { grid-template-columns: 1fr; min-width: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+    <div class="main-content">
+      <div class="page-content">
+        <div class="cr-shell">
+          <div class="content-header">
+            <h1><i class="fa-solid fa-arrows-rotate"></i> Change Request</h1>
+            <p>Manage client service modification requests</p>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-clock"></i></div><div class="stat-info"><h3 id="statPending">0</h3><p>Pending Requests</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-spinner"></i></div><div class="stat-info"><h3 id="statProgress">0</h3><p>In Progress</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div><div class="stat-info"><h3 id="statCompleted">0</h3><p>Completed</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-wifi"></i></div><div class="stat-info"><h3 id="statPackage">0</h3><p>Package Changes</p></div></div>
+          </div>
+
+          <div class="cr-grid">
+            <div class="card">
+              <div class="card-header"><h3><i class="fa-solid fa-plus-circle"></i> New Change Request</h3><small id="changeAccessText">Checking permission...</small></div>
+              <div class="card-body">
+                <form id="changeRequestForm" style="display:flex; flex-direction:column; gap:12px;">
+                  <div class="form-row">
+                    <div class="form-group" style="position:relative;">
+                      <label for="client-search">Client *</label>
+                      <input type="text" id="client-search" placeholder="Search code, name or phone" autocomplete="off" />
+                      <div id="clientSearchResults" class="search-results"></div>
+                      <input type="hidden" id="selected-client-id" />
+                    </div>
+                    <div class="form-group">
+                      <label for="request-type">Request Type *</label>
+                      <select id="request-type" required>
+                        <option value="">Select Type</option>
+                        <option value="package_change">Package Change</option>
+                        <option value="address_change">Address Change</option>
+                        <option value="contact_update">Contact Update</option>
+                        <option value="equipment_upgrade">Equipment Upgrade</option>
+                        <option value="billing_change">Billing Change</option>
+                        <option value="temporary_suspension">Temporary Suspension</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group"><label for="current-value">Current Value</label><input type="text" id="current-value" placeholder="Current package/address/contact" /></div>
+                    <div class="form-group"><label for="new-value">New Value</label><input type="text" id="new-value" placeholder="New package/address/contact" /></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group"><label for="effective-date">Effective Date *</label><input type="date" id="effective-date" required /></div>
+                    <div class="form-group"><label for="priority">Priority</label><select id="priority"><option value="normal">Normal</option><option value="urgent">Urgent</option><option value="emergency">Emergency</option></select></div>
+                  </div>
+                  <div class="form-group"><label for="request-reason">Reason *</label><textarea id="request-reason" rows="3" required></textarea></div>
+                  <div class="form-group"><label for="additional-notes">Additional Notes</label><textarea id="additional-notes" rows="2"></textarea></div>
+                  <div class="form-actions">
+                    <p id="changeFormMessage" class="page-msg"></p>
+                    <button type="submit" class="btn btn-navy" id="changeSubmitBtn"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
+                    <button type="reset" class="btn btn-navy"><i class="fa-solid fa-undo"></i> Clear Form</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Requests</h3></div>
+              <div class="card-body"><div id="recentChangeRequests" class="request-list"></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3><i class="fa-solid fa-list"></i> All Change Requests</h3></div>
+            <div class="card-body">
+              <div class="filter-row" style="display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:12px;">
+                <div class="filter-group"><label for="filter-status">Status</label><select id="filter-status"><option value="">All</option><option value="pending">Pending</option><option value="in_progress">In Progress</option><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option><option value="rejected">Rejected</option></select></div>
+                <div class="filter-group"><label for="filter-type">Type</label><select id="filter-type"><option value="">All</option><option value="package_change">Package Change</option><option value="address_change">Address Change</option><option value="contact_update">Contact Update</option><option value="equipment_upgrade">Equipment Upgrade</option><option value="billing_change">Billing Change</option><option value="temporary_suspension">Temporary Suspension</option><option value="other">Other</option></select></div>
+                <div class="filter-group"><label for="filter-search">Search</label><input type="text" id="filter-search" placeholder="Code, name, phone" /></div>
+                <div style="display:flex; align-items:flex-end; gap:8px;"><button class="btn btn-navy" id="applyFilterBtn" type="button"><i class="fa-solid fa-search"></i> Filter</button><button class="btn btn-navy" id="clearFilterBtn" type="button"><i class="fa-solid fa-rotate-left"></i> Clear</button></div>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Request ID</th>
+                      <th>Client</th>
+                      <th>Type</th>
+                      <th>Details</th>
+                      <th>Effective</th>
+                      <th>Status</th>
+                      <th>Priority</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="changeRequestTableBody"><tr><td colspan="8" style="text-align:center; padding:18px;">Loading...</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      let allRequests = [];
+      let canEdit = false;
+
+      const clientSearch = document.getElementById('client-search');
+      const clientSearchResults = document.getElementById('clientSearchResults');
+      const selectedClientId = document.getElementById('selected-client-id');
+      const changeRequestForm = document.getElementById('changeRequestForm');
+      const changeFormMessage = document.getElementById('changeFormMessage');
+      const changeSubmitBtn = document.getElementById('changeSubmitBtn');
+      const changeAccessText = document.getElementById('changeAccessText');
+      const tableBody = document.getElementById('changeRequestTableBody');
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text == null ? '' : String(text);
+        return div.innerHTML;
+      }
+
+      function setMessage(text, isError) {
+        changeFormMessage.textContent = text;
+        changeFormMessage.style.color = isError ? '#b42318' : '#0f6f3e';
+      }
+
+      function setEditMode(enabled) {
+        canEdit = !!enabled;
+        const fields = changeRequestForm.querySelectorAll('input, select, textarea');
+        fields.forEach((f) => f.disabled = !canEdit);
+        changeRequestForm.querySelectorAll('button[type="submit"], button[type="reset"]').forEach((button) => {
+          button.disabled = !canEdit;
+        });
+        changeAccessText.textContent = canEdit ? 'You can create and update requests' : 'View-only access';
+        changeAccessText.style.color = canEdit ? '#0f6f3e' : '#b42318';
+        document.querySelectorAll('#changeRequestTableBody button[data-status-id]').forEach((button) => {
+          button.disabled = !canEdit;
+        });
+      }
+
+      function normalizeType(type) {
+        const map = {
+          package_change: 'Package Change',
+          address_change: 'Address Change',
+          contact_update: 'Contact Update',
+          equipment_upgrade: 'Equipment Upgrade',
+          billing_change: 'Billing Change',
+          temporary_suspension: 'Temporary Suspension',
+          other: 'Other',
+          close_connection: 'Close Connection'
+        };
+        return map[type] || type || '-';
+      }
+
+      function renderStats(stats) {
+        document.getElementById('statPending').textContent = String(stats.pending || 0);
+        document.getElementById('statProgress').textContent = String(stats.in_progress || 0);
+        document.getElementById('statCompleted').textContent = String(stats.completed || 0);
+        document.getElementById('statPackage').textContent = String(stats.package_change || 0);
+      }
+
+      function renderRecent(items) {
+        const el = document.getElementById('recentChangeRequests');
+        if (!items.length) {
+          el.innerHTML = '<div style="padding:12px; border:1px dashed #d8e0e6; border-radius:10px; text-align:center; color:#677883;">No requests found</div>';
+          return;
+        }
+        el.innerHTML = items.slice(0, 7).map((r) => {
+          return '<div class="request-item">'
+            + '<div style="display:flex; justify-content:space-between; gap:8px; margin-bottom:6px;">'
+              + '<strong>' + escapeHtml(normalizeType(r.request_type)) + '</strong>'
+              + '<span class="status-badge ' + escapeHtml(r.status) + '">' + escapeHtml(r.status.replace('_', ' ')) + '</span>'
+            + '</div>'
+            + '<div style="font-size:12px; color:#5f6f7a;">' + escapeHtml(r.request_code || '-') + ' | ' + escapeHtml(r.full_name || '-') + '</div>'
+            + '<div style="font-size:12px; color:#5f6f7a; margin-top:3px;">' + escapeHtml(r.current_value || '-') + ' -> ' + escapeHtml(r.new_value || '-') + '</div>'
+          + '</div>';
+        }).join('');
+      }
+
+      function renderTable(items) {
+        if (!items.length) {
+          tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:18px;">No change requests found</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = items.map((r) => {
+          const actions = canEdit
+            ? '<div class="row-actions">'
+              + '<select data-status-select="' + r.id + '">'
+                + '<option value="pending">Pending</option>'
+                + '<option value="in_progress">In Progress</option>'
+                + '<option value="scheduled">Scheduled</option>'
+                + '<option value="completed">Completed</option>'
+                + '<option value="cancelled">Cancelled</option>'
+                + '<option value="rejected">Rejected</option>'
+              + '</select>'
+              + '<input type="text" data-notes-input="' + r.id + '" placeholder="Status note" />'
+              + '<button class="btn btn-sm btn-navy" type="button" data-update-request="' + r.id + '"><i class="fa-solid fa-pen-to-square"></i> Update</button>'
+            + '</div>'
+            : '<span style="color:#64748b; font-size:12px;">View only</span>';
+
+          return '<tr>'
+            + '<td>' + escapeHtml(r.request_code) + '</td>'
+            + '<td>' + escapeHtml((r.full_name || '-') + ' (' + (r.client_code || '-') + ')') + '</td>'
+            + '<td>' + escapeHtml(normalizeType(r.request_type)) + '</td>'
+            + '<td>' + escapeHtml((r.current_value || '-') + ' -> ' + (r.new_value || '-')) + '</td>'
+            + '<td>' + escapeHtml(r.effective_date || '-') + '</td>'
+            + '<td><span class="status-badge ' + escapeHtml(r.status) + '">' + escapeHtml(r.status.replace('_', ' ')) + '</span></td>'
+            + '<td><span class="priority-badge ' + escapeHtml(r.priority) + '">' + escapeHtml(r.priority) + '</span></td>'
+            + '<td>' + actions + '</td>'
+          + '</tr>';
+        }).join('');
+
+        items.forEach((item) => {
+          const statusSelect = tableBody.querySelector('[data-status-select="' + item.id + '"]');
+          if (statusSelect) {
+            statusSelect.value = item.status || 'pending';
+          }
+        });
+      }
+
+      async function loadRequests() {
+        const params = new URLSearchParams();
+        params.set('kind', 'change');
+        const status = document.getElementById('filter-status').value;
+        const search = document.getElementById('filter-search').value.trim();
+        if (status) params.set('status', status);
+        if (search) params.set('search', search);
+
+        const res = await fetch('backend/public/clients/service_requests_list.php?' + params.toString(), { credentials: 'same-origin' });
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:18px; color:#b42318;">' + escapeHtml(data.message || 'Failed to load requests') + '</td></tr>';
+          return;
+        }
+
+        allRequests = data.requests || [];
+        setEditMode(Boolean(data.can_edit));
+        const type = document.getElementById('filter-type').value;
+        const items = type ? allRequests.filter((r) => r.request_type === type) : allRequests;
+        renderStats(data.stats || {});
+        renderRecent(items);
+        renderTable(items);
+      }
+
+      async function searchClients(query) {
+        if (!query || query.length < 2) {
+          clientSearchResults.classList.remove('active');
+          clientSearchResults.innerHTML = '';
+          return;
+        }
+        const res = await fetch('backend/public/clients/search_active.php?q=' + encodeURIComponent(query), { credentials: 'same-origin' });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          clientSearchResults.innerHTML = '<div class="search-item" style="cursor:default; color:#b42318;">' + escapeHtml(data.message || 'Search failed') + '</div>';
+          clientSearchResults.classList.add('active');
+          return;
+        }
+
+        if (!data.clients.length) {
+          clientSearchResults.innerHTML = '<div class="search-item" style="cursor:default;">No clients found</div>';
+          clientSearchResults.classList.add('active');
+          return;
+        }
+
+        clientSearchResults.innerHTML = data.clients.map((c) => {
+          return '<div class="search-item" data-id="' + c.id + '" data-label="' + escapeHtml(c.client_code + ' - ' + c.full_name) + '" data-package="' + escapeHtml(c.package_name || '') + '">' + escapeHtml(c.client_code + ' - ' + c.full_name + ' (' + c.phone + ')') + '</div>';
+        }).join('');
+        clientSearchResults.classList.add('active');
+      }
+
+      async function submitChangeRequest(event) {
+        event.preventDefault();
+        if (!canEdit) {
+          setMessage('You do not have permission to create requests', true);
+          return;
+        }
+
+        const clientId = Number(selectedClientId.value || 0);
+        if (!clientId) {
+          setMessage('Please select a client', true);
+          return;
+        }
+
+        const payload = {
+          client_id: clientId,
+          request_kind: 'change',
+          request_type: document.getElementById('request-type').value,
+          current_value: document.getElementById('current-value').value.trim(),
+          new_value: document.getElementById('new-value').value.trim(),
+          effective_date: document.getElementById('effective-date').value,
+          priority: document.getElementById('priority').value,
+          reason: document.getElementById('request-reason').value.trim(),
+          notes: document.getElementById('additional-notes').value.trim(),
+        };
+
+        changeSubmitBtn.disabled = true;
+        const oldText = changeSubmitBtn.innerHTML;
+        changeSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+        setMessage('Submitting request...', false);
+
+        try {
+          const res = await fetch('backend/public/clients/service_requests_create.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            setMessage(data.message || 'Failed to submit request', true);
+            return;
+          }
+
+          setMessage('Change request submitted successfully', false);
+          changeRequestForm.reset();
+          selectedClientId.value = '';
+          await loadRequests();
+        } catch (error) {
+          setMessage('Network error while submitting request', true);
+        } finally {
+          changeSubmitBtn.disabled = false;
+          changeSubmitBtn.innerHTML = oldText;
+        }
+      }
+
+      async function updateStatus(id, status, notes) {
+        const res = await fetch('backend/public/clients/service_requests_update_status.php', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ request_id: Number(id), status, notes: notes || '' }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          setMessage(data.message || 'Failed to update status', true);
+          return;
+        }
+
+        setMessage('Status updated', false);
+        await loadRequests();
+      }
+
+      const debouncedSearch = debounce(searchClients, 260);
+      clientSearch.addEventListener('input', (e) => debouncedSearch(e.target.value.trim()));
+      clientSearchResults.addEventListener('click', (event) => {
+        const item = event.target.closest('.search-item[data-id]');
+        if (!item) return;
+        selectedClientId.value = item.getAttribute('data-id');
+        clientSearch.value = item.getAttribute('data-label');
+        document.getElementById('current-value').value = item.getAttribute('data-package') || '';
+        clientSearchResults.classList.remove('active');
+      });
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('#client-search') && !event.target.closest('#clientSearchResults')) {
+          clientSearchResults.classList.remove('active');
+        }
+      });
+
+      changeRequestForm.addEventListener('submit', submitChangeRequest);
+      document.getElementById('applyFilterBtn').addEventListener('click', loadRequests);
+      document.getElementById('clearFilterBtn').addEventListener('click', () => {
+        document.getElementById('filter-status').value = '';
+        document.getElementById('filter-type').value = '';
+        document.getElementById('filter-search').value = '';
+        loadRequests();
+      });
+      document.getElementById('filter-search').addEventListener('input', debounce(loadRequests, 260));
+      document.getElementById('filter-status').addEventListener('change', loadRequests);
+      document.getElementById('filter-type').addEventListener('change', loadRequests);
+
+      tableBody.addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-update-request]');
+        if (!btn) return;
+        const requestId = btn.getAttribute('data-update-request');
+        const statusSelect = tableBody.querySelector('[data-status-select="' + requestId + '"]');
+        const notesInput = tableBody.querySelector('[data-notes-input="' + requestId + '"]');
+        updateStatus(requestId, statusSelect ? statusSelect.value : 'pending', notesInput ? notesInput.value.trim() : '');
+      });
+
+      function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func(...args), wait);
+        };
+      }
+
+      document.getElementById('effective-date').setAttribute('min', new Date().toISOString().split('T')[0]);
+      loadRequests();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>Payhead</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --bg-soft: #ffffff;
+        --line: #d9e0ee;
+        --text-main: #16243d;
+        --text-soft: #4e6283;
+        --brand: #1f6df0;
+        --brand-soft: #dbe8ff;
+        --accent: #f59d2a;
+        --danger: #d54343;
+        --ok: #0f9b62;
+        --shadow: 0 14px 34px rgba(19, 47, 95, 0.14);
+      }
+
+      .payhead-page {
+        font-family: 'Outfit', sans-serif;
+        min-height: calc(100vh - 70px);
+        padding: 18px;
+        background:
+          radial-gradient(circle at 10% 10%, rgba(31, 109, 240, 0.14), transparent 28%),
+          radial-gradient(circle at 85% 18%, rgba(245, 157, 42, 0.17), transparent 24%),
+          linear-gradient(140deg, #f8faff 0%, #f1f5ff 55%, #eef2fa 100%);
+      }
+
+      .payhead-shell {
+        max-width: 1520px;
+        margin: 0 auto;
+        display: grid;
+        gap: 14px;
+      }
+
+      .payhead-head {
+        background: linear-gradient(120deg, #ffffff, #eef4ff);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 12px;
+        animation: rise 420ms ease-out;
+      }
+
+      .payhead-head h2 {
+        margin: 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.3rem;
+        color: var(--text-main);
+      }
+
+      .payhead-head p {
+        margin: 6px 0 0;
+        color: var(--text-soft);
+        font-size: 0.92rem;
+      }
+
+      .head-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .ph-btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-weight: 700;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      .ph-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .ph-btn.primary {
+        background: linear-gradient(140deg, var(--brand), #0f53c9);
+        color: #fff;
+        box-shadow: 0 10px 18px rgba(31, 109, 240, 0.26);
+      }
+
+      .ph-btn.secondary {
+        background: var(--bg-soft);
+        color: var(--text-main);
+        border: 1px solid var(--line);
+      }
+
+      .stats-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(5, minmax(180px, 1fr));
+      }
+
+      .stat-card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px;
+        box-shadow: var(--shadow);
+        animation: rise 520ms ease-out;
+      }
+
+      .stat-label {
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
+        color: var(--text-soft);
+        font-weight: 700;
+      }
+
+      .stat-value {
+        margin-top: 7px;
+        font-size: 1.28rem;
+        font-weight: 800;
+        color: var(--text-main);
+      }
+
+      .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .filters {
+        padding: 13px;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(5, minmax(120px, 1fr));
+        animation: rise 640ms ease-out;
+      }
+
+      .filters label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.73rem;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        color: var(--text-soft);
+      }
+
+      .filters input,
+      .filters select {
+        width: 100%;
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 6px 8px;
+        background: #f8faff;
+        font-size: 0.88rem;
+        color: var(--text-main);
+      }
+
+      .table-wrap {
+        overflow: auto;
+        animation: rise 760ms ease-out;
+      }
+
+      .payhead-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1300px;
+      }
+
+      .payhead-table thead th {
+        background: #edf3ff;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        text-align: left;
+        font-size: 0.73rem;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: #36527f;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .payhead-table tbody td {
+        padding: 8px;
+        border-bottom: 1px solid #e8ecf5;
+        font-size: 0.86rem;
+        color: var(--text-main);
+      }
+
+      .payhead-table tbody tr:hover {
+        background: #f7faff;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-size: 0.73rem;
+        font-weight: 700;
+      }
+
+      .pill.earning {
+        background: #daf2e8;
+        color: #0d7950;
+      }
+
+      .pill.deduction {
+        background: #fde5e6;
+        color: #9f2a2d;
+      }
+
+      .pill.other {
+        background: #e7edff;
+        color: #3650b5;
+      }
+
+      .tag {
+        display: inline-block;
+        background: #eef3fe;
+        color: #39598a;
+        border-radius: 999px;
+        padding: 2px 8px;
+        margin-right: 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .status {
+        font-weight: 700;
+      }
+
+      .status.active {
+        color: var(--ok);
+      }
+
+      .status.inactive {
+        color: var(--danger);
+      }
+
+      .row-actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .icon-btn {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--text-main);
+        border-radius: 8px;
+        min-width: 30px;
+        min-height: 30px;
+        cursor: pointer;
+      }
+
+      .icon-btn.danger {
+        color: var(--danger);
+      }
+
+      .empty {
+        text-align: center;
+        color: var(--text-soft);
+        padding: 26px;
+      }
+
+      .status-line {
+        padding: 8px 13px 12px;
+        color: var(--text-soft);
+        font-size: 0.82rem;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 22, 45, 0.45);
+        z-index: 4000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 18px;
+      }
+
+      .modal.open {
+        display: flex;
+      }
+
+      .modal-card {
+        width: min(1120px, 98vw);
+        max-height: 92vh;
+        overflow: auto;
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #d9e5fd;
+        box-shadow: 0 26px 52px rgba(8, 22, 45, 0.34);
+        animation: rise 240ms ease-out;
+      }
+
+      .modal-head {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f1f6ff;
+        border-bottom: 1px solid #dce8ff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+      }
+
+      .modal-head h3 {
+        margin: 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.02rem;
+      }
+
+      .modal-grid {
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+      }
+
+      .modal-grid .span2 {
+        grid-column: span 2;
+      }
+
+      .modal-grid .span4 {
+        grid-column: span 4;
+      }
+
+      .modal-grid label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.74rem;
+        color: var(--text-soft);
+        font-weight: 700;
+      }
+
+      .modal-grid input,
+      .modal-grid select,
+      .modal-grid textarea {
+        width: 100%;
+        border: 1px solid #d5e2fd;
+        border-radius: 9px;
+        padding: 7px;
+        background: #fbfdff;
+        color: var(--text-main);
+        min-height: 38px;
+        font-size: 0.87rem;
+      }
+
+      .modal-grid textarea {
+        min-height: 86px;
+        resize: vertical;
+      }
+
+      .switches {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(4, minmax(120px, 1fr));
+      }
+
+      .switch-item {
+        border: 1px solid #dae4f7;
+        border-radius: 9px;
+        background: #f8fbff;
+        padding: 8px;
+      }
+
+      .switch-item label {
+        margin: 0;
+        font-size: 0.81rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .modal-foot {
+        padding: 12px 14px;
+        border-top: 1px solid #e5ecf9;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        background: #fbfdff;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1200px) {
+        .stats-grid {
+          grid-template-columns: repeat(3, minmax(160px, 1fr));
+        }
+
+        .filters {
+          grid-template-columns: repeat(3, minmax(140px, 1fr));
+        }
+
+        .modal-grid {
+          grid-template-columns: repeat(2, minmax(160px, 1fr));
+        }
+
+        .modal-grid .span4 {
+          grid-column: span 2;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .payhead-page {
+          padding: 10px;
+        }
+
+        .stats-grid,
+        .filters,
+        .modal-grid,
+        .switches {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-grid .span2,
+        .modal-grid .span4 {
+          grid-column: span 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+
+    <div class="main-content">
+      <div class="payhead-page">
+        <div class="payhead-shell">
+          <section class="payhead-head">
+            <div>
+              <h2><i class="fa-solid fa-layer-group"></i> Professional Payhead Manager</h2>
+              <p>Configure earnings, deductions, formulas, slabs, statutory applicability, and payroll priority with database-backed governance.</p>
+            </div>
+            <div class="head-actions">
+              <button class="ph-btn secondary" id="btnRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+              <button class="ph-btn secondary" id="btnExport"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+              <button class="ph-btn primary" id="btnAdd"><i class="fa-solid fa-plus"></i> Add Payhead</button>
+            </div>
+          </section>
+
+          <section class="stats-grid">
+            <div class="stat-card"><div class="stat-label">Total Payheads</div><div class="stat-value" id="statTotal">0</div></div>
+            <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value" id="statActive">0</div></div>
+            <div class="stat-card"><div class="stat-label">Earnings</div><div class="stat-value" id="statEarning">0</div></div>
+            <div class="stat-card"><div class="stat-label">Deductions</div><div class="stat-value" id="statDeduction">0</div></div>
+            <div class="stat-card"><div class="stat-label">Formula Based</div><div class="stat-value" id="statFormula">0</div></div>
+          </section>
+
+          <section class="panel">
+            <div class="filters">
+              <div>
+                <label for="searchInput">Search</label>
+                <input id="searchInput" placeholder="Name, code, GL" />
+              </div>
+              <div>
+                <label for="typeFilter">Payhead Type</label>
+                <select id="typeFilter">
+                  <option value="all">All Types</option>
+                  <option value="Earning">Earning</option>
+                  <option value="Deduction">Deduction</option>
+                  <option value="Reimbursement">Reimbursement</option>
+                  <option value="Employer Contribution">Employer Contribution</option>
+                </select>
+              </div>
+              <div>
+                <label for="calcFilter">Calculation</label>
+                <select id="calcFilter">
+                  <option value="all">All Modes</option>
+                  <option value="Fixed">Fixed</option>
+                  <option value="Percentage">Percentage</option>
+                  <option value="Formula">Formula</option>
+                  <option value="Slab">Slab</option>
+                </select>
+              </div>
+              <div>
+                <label for="statusFilter">Status</label>
+                <select id="statusFilter">
+                  <option value="all">All Status</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+              <div>
+                <label for="taxableFilter">Taxability</label>
+                <select id="taxableFilter">
+                  <option value="all">All</option>
+                  <option value="taxable">Taxable</option>
+                  <option value="nontaxable">Non-taxable</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table class="payhead-table">
+                <thead>
+                  <tr>
+                    <th>Name / Code</th>
+                    <th>Type</th>
+                    <th>Calculation</th>
+                    <th>Default Value</th>
+                    <th>Category</th>
+                    <th>Compliance</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Effective</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="payheadTable">
+                  <tr><td colspan="10" class="empty">Loading payheads...</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="status-line" id="statusLine">Loading payheads from database...</div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="payheadModal">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3 id="modalTitle"><i class="fa-solid fa-plus"></i> Add Payhead</h3>
+          <button class="icon-btn" id="btnCloseModal" type="button"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <form id="payheadForm">
+          <input type="hidden" id="f_id" />
+          <div class="modal-grid">
+            <div>
+              <label for="f_name">Payhead Name *</label>
+              <input id="f_name" required />
+            </div>
+            <div>
+              <label for="f_code">Payhead Code</label>
+              <input id="f_code" placeholder="Auto if empty" />
+            </div>
+            <div>
+              <label for="f_type">Payhead Type *</label>
+              <select id="f_type" required>
+                <option value="Earning">Earning</option>
+                <option value="Deduction">Deduction</option>
+                <option value="Reimbursement">Reimbursement</option>
+                <option value="Employer Contribution">Employer Contribution</option>
+              </select>
+            </div>
+            <div>
+              <label for="f_category">Category</label>
+              <input id="f_category" placeholder="Allowance, Tax, Bonus, etc." />
+            </div>
+
+            <div>
+              <label for="f_calculation">Calculation Type *</label>
+              <select id="f_calculation" required>
+                <option value="Fixed">Fixed</option>
+                <option value="Percentage">Percentage</option>
+                <option value="Formula">Formula</option>
+                <option value="Slab">Slab</option>
+              </select>
+            </div>
+            <div>
+              <label for="f_defaultValue">Default Value</label>
+              <input id="f_defaultValue" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div>
+              <label for="f_percentageBase">Percentage Base</label>
+              <select id="f_percentageBase">
+                <option value="">N/A</option>
+                <option value="BASIC">BASIC</option>
+                <option value="GROSS">GROSS</option>
+                <option value="NET">NET</option>
+                <option value="CTC">CTC</option>
+              </select>
+            </div>
+            <div>
+              <label for="f_percentageRate">Percentage Rate (%)</label>
+              <input id="f_percentageRate" type="number" min="0" step="0.0001" value="0" />
+            </div>
+
+            <div>
+              <label for="f_priority">Priority Order</label>
+              <input id="f_priority" type="number" min="1" step="1" value="100" />
+            </div>
+            <div>
+              <label for="f_maxLimit">Max Limit</label>
+              <input id="f_maxLimit" type="number" min="0" step="0.01" />
+            </div>
+            <div>
+              <label for="f_glCode">GL Code</label>
+              <input id="f_glCode" placeholder="Accounting code" />
+            </div>
+            <div>
+              <label for="f_status">Status</label>
+              <select id="f_status">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="f_effectiveFrom">Effective From</label>
+              <input id="f_effectiveFrom" type="date" />
+            </div>
+            <div>
+              <label for="f_effectiveTo">Effective To</label>
+              <input id="f_effectiveTo" type="date" />
+            </div>
+
+            <div class="span4 switches">
+              <div class="switch-item"><label><input id="f_taxable" type="checkbox" /> Taxable</label></div>
+              <div class="switch-item"><label><input id="f_pf" type="checkbox" /> PF Applicable</label></div>
+              <div class="switch-item"><label><input id="f_esi" type="checkbox" /> ESI Applicable</label></div>
+              <div class="switch-item"><label><input id="f_attendance" type="checkbox" /> Affect Attendance</label></div>
+              <div class="switch-item"><label><input id="f_prorata" type="checkbox" /> Pro-rata</label></div>
+              <div class="switch-item"><label><input id="f_recurring" type="checkbox" checked /> Recurring</label></div>
+              <div class="switch-item"><label><input id="f_visible" type="checkbox" checked /> Visible On Payslip</label></div>
+            </div>
+
+            <div class="span2">
+              <label for="f_formula">Formula Expression</label>
+              <textarea id="f_formula" placeholder="Example: (BASIC * 0.12) + 500"></textarea>
+            </div>
+            <div class="span2">
+              <label for="f_slab">Slab Definition (JSON Array)</label>
+              <textarea id="f_slab" placeholder='Example: [{"min":0,"max":20000,"value":0},{"min":20001,"max":50000,"value":5}]'></textarea>
+            </div>
+
+            <div class="span4">
+              <label for="f_description">Description</label>
+              <textarea id="f_description" placeholder="Business logic, compliance notes, payroll behavior"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-foot">
+            <button type="button" class="ph-btn secondary" id="btnCancel">Cancel</button>
+            <button type="submit" class="ph-btn primary" id="btnSave">Save Payhead</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      const state = {
+        payheads: [],
+        filtered: []
+      };
+
+      const dom = {
+        table: document.getElementById('payheadTable'),
+        statusLine: document.getElementById('statusLine'),
+        searchInput: document.getElementById('searchInput'),
+        typeFilter: document.getElementById('typeFilter'),
+        calcFilter: document.getElementById('calcFilter'),
+        statusFilter: document.getElementById('statusFilter'),
+        taxableFilter: document.getElementById('taxableFilter'),
+        statTotal: document.getElementById('statTotal'),
+        statActive: document.getElementById('statActive'),
+        statEarning: document.getElementById('statEarning'),
+        statDeduction: document.getElementById('statDeduction'),
+        statFormula: document.getElementById('statFormula'),
+        modal: document.getElementById('payheadModal'),
+        modalTitle: document.getElementById('modalTitle'),
+        form: document.getElementById('payheadForm')
+      };
+
+      function money(value) {
+        return Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 });
+      }
+
+      function parseSlabText(value) {
+        const clean = (value || '').trim();
+        if (!clean) return 'N/A';
+        try {
+          const list = JSON.parse(clean);
+          if (!Array.isArray(list)) return 'Invalid';
+          return `${list.length} slab(s)`;
+        } catch (_error) {
+          return 'Invalid JSON';
+        }
+      }
+
+      function getTypeClass(payheadType) {
+        if (payheadType === 'Earning') return 'earning';
+        if (payheadType === 'Deduction') return 'deduction';
+        return 'other';
+      }
+
+      function updateStats(summary) {
+        dom.statTotal.textContent = Number(summary.total || 0);
+        dom.statActive.textContent = Number(summary.active || 0);
+        dom.statEarning.textContent = Number(summary.earning || 0);
+        dom.statDeduction.textContent = Number(summary.deduction || 0);
+        dom.statFormula.textContent = Number(summary.formula || 0);
+      }
+
+      function renderTable() {
+        if (!state.filtered.length) {
+          dom.table.innerHTML = '<tr><td colspan="10" class="empty">No payhead found for current filters.</td></tr>';
+          return;
+        }
+
+        const html = state.filtered.map((item, index) => {
+          const compliance = [
+            item.taxable ? 'Taxable' : null,
+            item.pfApplicable ? 'PF' : null,
+            item.esiApplicable ? 'ESI' : null,
+            item.visibleOnPayslip ? 'Payslip' : null,
+            item.proRata ? 'Pro-rata' : null
+          ].filter(Boolean);
+
+          let valueLabel = money(item.defaultValue);
+          if (item.calculationType === 'Percentage') {
+            valueLabel = `${money(item.percentageRate)}% of ${item.percentageBase || 'BASE'}`;
+          } else if (item.calculationType === 'Formula') {
+            valueLabel = item.formulaExpression || 'N/A';
+          } else if (item.calculationType === 'Slab') {
+            valueLabel = parseSlabText(item.slabDefinition);
+          }
+
+          return `
+            <tr style="animation: rise ${240 + index * 10}ms ease-out;">
+              <td>
+                <strong>${item.payheadName}</strong>
+                <div style="color:#4e6283; font-size:0.76rem; margin-top:2px;">${item.payheadCode}</div>
+              </td>
+              <td><span class="pill ${getTypeClass(item.payheadType)}">${item.payheadType}</span></td>
+              <td>${item.calculationType}</td>
+              <td>${valueLabel}</td>
+              <td>${item.payheadCategory || '-'}</td>
+              <td>${compliance.map((v) => `<span class="tag">${v}</span>`).join('') || '-'}</td>
+              <td>${item.priorityOrder}</td>
+              <td><span class="status ${item.statusLabel === 'Active' ? 'active' : 'inactive'}">${item.statusLabel}</span></td>
+              <td>${item.effectiveFrom || '-'}${item.effectiveTo ? ` to ${item.effectiveTo}` : ''}</td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" data-edit="${item.id}" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                  <button class="icon-btn danger" data-delete="${item.id}" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        dom.table.innerHTML = html;
+      }
+
+      function applyFilters() {
+        const search = (dom.searchInput.value || '').trim().toLowerCase();
+        const type = dom.typeFilter.value;
+        const calc = dom.calcFilter.value;
+        const status = dom.statusFilter.value;
+        const taxable = dom.taxableFilter.value;
+
+        state.filtered = state.payheads.filter((item) => {
+          if (type !== 'all' && item.payheadType !== type) return false;
+          if (calc !== 'all' && item.calculationType !== calc) return false;
+          if (status !== 'all' && item.statusLabel !== status) return false;
+          if (taxable === 'taxable' && !item.taxable) return false;
+          if (taxable === 'nontaxable' && item.taxable) return false;
+
+          if (search) {
+            const haystack = `${item.payheadName} ${item.payheadCode} ${item.glCode} ${item.payheadCategory}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+          }
+          return true;
+        });
+
+        renderTable();
+        dom.statusLine.textContent = `Showing ${state.filtered.length} payhead(s).`;
+      }
+
+      function openModal(item) {
+        const isEdit = !!item;
+        dom.modalTitle.innerHTML = isEdit
+          ? '<i class="fa-solid fa-pen"></i> Edit Payhead'
+          : '<i class="fa-solid fa-plus"></i> Add Payhead';
+
+        document.getElementById('f_id').value = isEdit ? item.id : '';
+        document.getElementById('f_name').value = isEdit ? item.payheadName : '';
+        document.getElementById('f_code').value = isEdit ? item.payheadCode : '';
+        document.getElementById('f_type').value = isEdit ? item.payheadType : 'Earning';
+        document.getElementById('f_category').value = isEdit ? (item.payheadCategory || '') : '';
+        document.getElementById('f_calculation').value = isEdit ? item.calculationType : 'Fixed';
+        document.getElementById('f_defaultValue').value = isEdit ? Number(item.defaultValue || 0) : 0;
+        document.getElementById('f_percentageBase').value = isEdit ? (item.percentageBase || '') : '';
+        document.getElementById('f_percentageRate').value = isEdit ? Number(item.percentageRate || 0) : 0;
+        document.getElementById('f_priority').value = isEdit ? Number(item.priorityOrder || 100) : 100;
+        document.getElementById('f_maxLimit').value = isEdit && item.maxLimit !== null ? Number(item.maxLimit) : '';
+        document.getElementById('f_glCode').value = isEdit ? (item.glCode || '') : '';
+        document.getElementById('f_status').value = isEdit ? (item.statusLabel || 'Active') : 'Active';
+        document.getElementById('f_effectiveFrom').value = isEdit ? (item.effectiveFrom || '') : '';
+        document.getElementById('f_effectiveTo').value = isEdit ? (item.effectiveTo || '') : '';
+        document.getElementById('f_taxable').checked = isEdit ? !!item.taxable : false;
+        document.getElementById('f_pf').checked = isEdit ? !!item.pfApplicable : false;
+        document.getElementById('f_esi').checked = isEdit ? !!item.esiApplicable : false;
+        document.getElementById('f_attendance').checked = isEdit ? !!item.affectAttendance : false;
+        document.getElementById('f_prorata').checked = isEdit ? !!item.proRata : false;
+        document.getElementById('f_recurring').checked = isEdit ? !!item.isRecurring : true;
+        document.getElementById('f_visible').checked = isEdit ? !!item.visibleOnPayslip : true;
+        document.getElementById('f_formula').value = isEdit ? (item.formulaExpression || '') : '';
+        document.getElementById('f_slab').value = isEdit ? (item.slabDefinition || '') : '';
+        document.getElementById('f_description').value = isEdit ? (item.descriptionText || '') : '';
+
+        dom.modal.classList.add('open');
+      }
+
+      function closeModal() {
+        dom.modal.classList.remove('open');
+      }
+
+      function getPayload() {
+        return {
+          payheadId: Number(document.getElementById('f_id').value || 0),
+          payheadName: (document.getElementById('f_name').value || '').trim(),
+          payheadCode: (document.getElementById('f_code').value || '').trim(),
+          payheadType: document.getElementById('f_type').value,
+          payheadCategory: (document.getElementById('f_category').value || '').trim(),
+          calculationType: document.getElementById('f_calculation').value,
+          defaultValue: Number(document.getElementById('f_defaultValue').value || 0),
+          percentageBase: document.getElementById('f_percentageBase').value,
+          percentageRate: Number(document.getElementById('f_percentageRate').value || 0),
+          priorityOrder: Number(document.getElementById('f_priority').value || 100),
+          maxLimit: (document.getElementById('f_maxLimit').value || '').trim(),
+          glCode: (document.getElementById('f_glCode').value || '').trim(),
+          statusLabel: document.getElementById('f_status').value,
+          effectiveFrom: document.getElementById('f_effectiveFrom').value,
+          effectiveTo: document.getElementById('f_effectiveTo').value,
+          taxable: document.getElementById('f_taxable').checked,
+          pfApplicable: document.getElementById('f_pf').checked,
+          esiApplicable: document.getElementById('f_esi').checked,
+          affectAttendance: document.getElementById('f_attendance').checked,
+          proRata: document.getElementById('f_prorata').checked,
+          isRecurring: document.getElementById('f_recurring').checked,
+          visibleOnPayslip: document.getElementById('f_visible').checked,
+          formulaExpression: (document.getElementById('f_formula').value || '').trim(),
+          slabDefinition: (document.getElementById('f_slab').value || '').trim(),
+          descriptionText: (document.getElementById('f_description').value || '').trim()
+        };
+      }
+
+      async function savePayhead(event) {
+        event.preventDefault();
+        const payload = getPayload();
+
+        if (!payload.payheadName) {
+          alert('Payhead name is required.');
+          return;
+        }
+
+        const response = await fetch('backend/public/payheads/upsert.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok || !data || data.ok === false) {
+          alert((data && data.message) || 'Failed to save payhead.');
+          return;
+        }
+
+        closeModal();
+        await loadPayheads();
+      }
+
+      async function deletePayhead(id) {
+        if (!confirm('Delete this payhead? This cannot be undone.')) return;
+
+        const response = await fetch('backend/public/payheads/delete.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ payheadId: id })
+        });
+
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || data.ok === false) {
+          alert((data && data.message) || 'Failed to delete payhead.');
+          return;
+        }
+
+        await loadPayheads();
+      }
+
+      function exportExcel() {
+        if (!window.XLSX) {
+          alert('Excel library failed to load.');
+          return;
+        }
+
+        const rows = state.filtered.map((item) => ({
+          Code: item.payheadCode,
+          Name: item.payheadName,
+          Type: item.payheadType,
+          Category: item.payheadCategory || '',
+          Calculation: item.calculationType,
+          Default_Value: Number(item.defaultValue || 0),
+          Percentage_Base: item.percentageBase || '',
+          Percentage_Rate: Number(item.percentageRate || 0),
+          Taxable: item.taxable ? 'Yes' : 'No',
+          PF_Applicable: item.pfApplicable ? 'Yes' : 'No',
+          ESI_Applicable: item.esiApplicable ? 'Yes' : 'No',
+          Pro_Rata: item.proRata ? 'Yes' : 'No',
+          Recurring: item.isRecurring ? 'Yes' : 'No',
+          Visible_On_Payslip: item.visibleOnPayslip ? 'Yes' : 'No',
+          Status: item.statusLabel,
+          Priority: item.priorityOrder,
+          Max_Limit: item.maxLimit === null ? '' : item.maxLimit,
+          GL_Code: item.glCode || '',
+          Effective_From: item.effectiveFrom || '',
+          Effective_To: item.effectiveTo || '',
+          Formula: item.formulaExpression || '',
+          Slab_JSON: item.slabDefinition || '',
+          Description: item.descriptionText || ''
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Payheads');
+        XLSX.writeFile(wb, 'payheads_master.xlsx');
+      }
+
+      async function loadPayheads() {
+        dom.statusLine.textContent = 'Loading payheads from database...';
+
+        const response = await fetch('backend/public/payheads/list.php', {
+          method: 'GET',
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || data.ok === false) {
+          const message = (data && data.message) || 'Failed to load payheads.';
+          dom.statusLine.textContent = message;
+          dom.table.innerHTML = `<tr><td colspan="10" class="empty">${message}</td></tr>`;
+          updateStats({ total: 0, active: 0, earning: 0, deduction: 0, formula: 0 });
+          return;
+        }
+
+        state.payheads = Array.isArray(data.payheads) ? data.payheads : [];
+        updateStats(data.summary || { total: state.payheads.length });
+        applyFilters();
+      }
+
+      function bindEvents() {
+        [dom.searchInput, dom.typeFilter, dom.calcFilter, dom.statusFilter, dom.taxableFilter].forEach((el) => {
+          el.addEventListener('input', applyFilters);
+          el.addEventListener('change', applyFilters);
+        });
+
+        dom.form.addEventListener('submit', (event) => {
+          savePayhead(event).catch((error) => {
+            alert(error.message || 'Failed to save payhead.');
+          });
+        });
+
+        document.getElementById('btnAdd').addEventListener('click', () => openModal(null));
+        document.getElementById('btnRefresh').addEventListener('click', () => {
+          loadPayheads().catch((error) => {
+            dom.statusLine.textContent = error.message;
+            dom.table.innerHTML = `<tr><td colspan="10" class="empty">${error.message}</td></tr>`;
+          });
+        });
+        document.getElementById('btnExport').addEventListener('click', exportExcel);
+        document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+        document.getElementById('btnCancel').addEventListener('click', closeModal);
+
+        dom.modal.addEventListener('click', (event) => {
+          if (event.target === dom.modal) closeModal();
+        });
+
+        dom.table.addEventListener('click', (event) => {
+          const editId = event.target.closest('[data-edit]');
+          if (editId) {
+            const id = Number(editId.getAttribute('data-edit') || 0);
+            const item = state.payheads.find((row) => row.id === id);
+            if (item) openModal(item);
+            return;
+          }
+
+          const deleteId = event.target.closest('[data-delete]');
+          if (deleteId) {
+            const id = Number(deleteId.getAttribute('data-delete') || 0);
+            if (id > 0) {
+              deletePayhead(id).catch((error) => {
+                alert(error.message || 'Failed to delete payhead.');
+              });
+            }
+          }
+        });
+      }
+
+      bindEvents();
+      loadPayheads().catch((error) => {
+        dom.statusLine.textContent = error.message;
+        dom.table.innerHTML = `<tr><td colspan="10" class="empty">${error.message}</td></tr>`;
+      });
+    </script>
+  </body>
+</html>
+
+
+
+

@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - Left Clients</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      :root {
+        --lc-bg-a: #f2f7f8;
+        --lc-bg-b: #e6eef0;
+        --lc-ink: #142a35;
+        --lc-muted: #60717d;
+        --lc-accent: #0f7d8a;
+        --lc-accent-2: #c95d2b;
+        --lc-danger: #b42318;
+      }
+
+      .left-shell {
+        border-radius: 18px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 8% 14%, rgba(15, 125, 138, 0.15), transparent 30%),
+          radial-gradient(circle at 90% 0%, rgba(201, 93, 43, 0.14), transparent 28%),
+          linear-gradient(170deg, var(--lc-bg-a), var(--lc-bg-b));
+      }
+
+      .left-shell::before,
+      .left-shell::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+      }
+
+      .left-shell::before {
+        width: 230px;
+        height: 230px;
+        right: -65px;
+        top: -80px;
+        background: rgba(201, 93, 43, 0.12);
+        animation: floatA 12s ease-in-out infinite;
+      }
+
+      .left-shell::after {
+        width: 190px;
+        height: 190px;
+        left: -55px;
+        bottom: -75px;
+        background: rgba(15, 125, 138, 0.14);
+        animation: floatB 15s ease-in-out infinite;
+      }
+
+      .content-header,
+      .stats-grid,
+      .card {
+        position: relative;
+        z-index: 1;
+      }
+
+      .content-header h1 {
+        color: var(--lc-ink);
+      }
+
+      .content-header p {
+        color: var(--lc-muted);
+      }
+
+      .stats-grid .stat-card {
+        border-radius: 14px;
+        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+        color: #fff !important;
+      }
+
+      .stats-grid .stat-card:nth-child(1) { background: linear-gradient(135deg, #0d5f6a, #138c99) !important; }
+      .stats-grid .stat-card:nth-child(2) { background: linear-gradient(135deg, #415e8f, #5b7fba) !important; }
+      .stats-grid .stat-card:nth-child(3) { background: linear-gradient(135deg, #8d5b0f, #bc7a17) !important; }
+      .stats-grid .stat-card:nth-child(4) { background: linear-gradient(135deg, #7a1f1f, #b13a3a) !important; }
+
+      .stats-grid .stat-card .stat-icon {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+      }
+
+      .stats-grid .stat-card .stat-info h3,
+      .stats-grid .stat-card .stat-info p,
+      .stats-grid .stat-card .stat-info {
+        color: #ffffff !important;
+      }
+
+      .card {
+        border-radius: 14px;
+        border: 1px solid rgba(20, 42, 53, 0.08);
+        box-shadow: 0 12px 36px rgba(7, 17, 24, 0.08);
+        opacity: 0;
+        transform: translateY(14px);
+        animation: cardReveal 0.45s ease forwards;
+      }
+
+      .card:nth-of-type(2) { animation-delay: 0.08s; }
+      .card:nth-of-type(3) { animation-delay: 0.14s; }
+
+      .search-results { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 6px; max-height: 300px; overflow-y: auto; z-index: 10; display: none; }
+      .search-results.active { display: block; }
+      .search-result-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
+      .search-result-item:hover { background: #f9fafb; }
+      .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; align-items: center; justify-content: center; }
+      .modal-overlay.active { display: flex; }
+      .modal-content { background: white; border-radius: 8px; padding: 30px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
+      .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; }
+      .modal-close { border: none; background: none; font-size: 24px; cursor: pointer; color: #6b7280; }
+      .client-search-wrap { position: relative; }
+      .reason-badge { font-size: 11px; border-radius: 999px; padding: 4px 10px; font-weight: 700; text-transform: capitalize; }
+      .reason-badge.relocation { background: #d6efff; color: #0b5872; }
+      .reason-badge.service { background: #ffd8d8; color: #7f1414; }
+      .reason-badge.price { background: #ffe4be; color: #82510b; }
+      .reason-badge.competition { background: #e4e0ff; color: #47328f; }
+      .reason-badge.other { background: #ecedf0; color: #344451; }
+      .status-badge { font-size: 11px; border-radius: 999px; padding: 4px 10px; font-weight: 700; }
+      .status-badge.returned { background: #d1f0db; color: #0e683a; }
+      .status-badge.partial { background: #ffedc8; color: #845205; }
+      .status-badge.not-returned { background: #ffd9d7; color: #8f1f1c; }
+
+      @keyframes cardReveal {
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes floatA {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-12px, 18px); }
+      }
+
+      @keyframes floatB {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(14px, -12px); }
+      }
+
+      @media (max-width: 768px) {
+        .left-shell { padding: 12px; border-radius: 12px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+    <div class="main-content">
+      <div class="page-content">
+        <div class="left-shell">
+        <div class="content-header">
+          <h1><i class="fa-solid fa-user-xmark"></i> Left Clients</h1>
+          <p>Manage clients who have terminated their services</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-user-xmark"></i></div>
+            <div class="stat-info">
+              <h3 id="totalLeftClients">0</h3>
+              <p>Total Left Clients</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+            <div class="stat-info">
+              <h3 id="thisMonthLeft">0</h3>
+              <p>This Month</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+            <div class="stat-info">
+              <h3 id="totalDues">0 BDT</h3>
+              <p>Pending Dues</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-box"></i></div>
+            <div class="stat-info">
+              <h3 id="equipmentPending">0</h3>
+              <p>Equipment Not Returned</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-filter"></i> Filter Options</h3>
+          </div>
+          <div class="card-body">
+            <div class="filter-row">
+              <div class="filter-group" style="flex: 1;">
+                <label for="filter-date-from">From Date</label>
+                <input type="date" id="filter-date-from" />
+              </div>
+              <div class="filter-group" style="flex: 1;">
+                <label for="filter-date-to">To Date</label>
+                <input type="date" id="filter-date-to" />
+              </div>
+              <div class="filter-group" style="flex: 1;">
+                <label for="filter-reason">Termination Reason</label>
+                <select id="filter-reason">
+                  <option value="">All Reasons</option>
+                  <option value="relocation">Relocation</option>
+                  <option value="service">Service Issues</option>
+                  <option value="price">Price Concern</option>
+                  <option value="competition">Competition</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="filter-group" style="flex: 1;">
+                <label for="filter-package">Previous Package</label>
+                <select id="filter-package">
+                  <option value="">All Packages</option>
+                  <option value="Basic">Basic</option>
+                  <option value="Standard">Standard</option>
+                  <option value="Premium">Premium</option>
+                  <option value="Ultra">Ultra</option>
+                </select>
+              </div>
+              <div class="filter-group" style="flex: 1;">
+                <label for="filter-search">Search</label>
+                <input type="text" id="filter-search" placeholder="Name or phone" />
+              </div>
+              <button type="button" class="btn btn-primary btn-navy" id="applyFilterBtn" style="align-self: flex-end;">
+                <i class="fa-solid fa-search"></i> Apply
+              </button>
+              <button type="button" class="btn btn-navy" id="clearFilterBtn" style="align-self: flex-end;">
+                <i class="fa-solid fa-filter-circle-xmark"></i> Clear
+              </button>
+              <button type="button" class="btn btn-navy" id="exportExcelBtn" style="align-self: flex-end;">
+                <i class="fa-solid fa-file-excel"></i> Excel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Left Clients Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-users-slash"></i> Left Clients List</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Client Code</th>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Package</th>
+                    <th>Joined</th>
+                    <th>Left Date</th>
+                    <th>Reason</th>
+                    <th>Pending</th>
+                    <th>Equipment</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="leftClientTableBody">
+                  <tr><td colspan="10" style="text-align:center; padding:20px;">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-power-off"></i> Close Connection Requests</h3>
+            <small>Client-submitted close requests waiting for processing</small>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Request ID</th>
+                    <th>Client</th>
+                    <th>Phone</th>
+                    <th>Requested Date</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="closeRequestTableBody">
+                  <tr><td colspan="7" style="text-align:center; padding:20px;">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Termination Process -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-user-minus"></i> Process Client Termination</h3>
+            <small id="terminationAccessText">Checking permission...</small>
+          </div>
+          <div class="card-body">
+            <form id="terminationForm" style="display: flex; flex-direction: column; gap: 20px;">
+              <div class="form-row">
+                <div class="form-group" style="flex: 1; position: relative;">
+                  <label for="client-search">Client Code / Name / Phone *</label>
+                  <div class="client-search-wrap">
+                    <input type="text" id="client-search" placeholder="Search active clients..." autocomplete="off" />
+                    <div id="clientSearchResults" class="search-results"></div>
+                  </div>
+                  <input type="hidden" id="selected-client-id" />
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label for="termination-date">Termination Date *</label>
+                  <input type="date" id="termination-date" required />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                  <label for="termination-reason">Termination Reason *</label>
+                  <select id="termination-reason" required>
+                    <option value="">Select Reason</option>
+                    <option value="relocation">Relocation</option>
+                    <option value="service">Service Issues</option>
+                    <option value="price">Price Concern</option>
+                    <option value="competition">Competition</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label for="pending-dues">Pending Dues (BDT)</label>
+                  <input type="number" id="pending-dues" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                  <label for="equipment-returned">Equipment Status *</label>
+                  <select id="equipment-returned" required>
+                    <option value="">Select Status</option>
+                    <option value="returned">All Returned</option>
+                    <option value="partial">Partially Returned</option>
+                    <option value="not-returned">Not Returned</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="termination-notes">Notes</label>
+                <textarea id="termination-notes" rows="3" placeholder="Additional notes about termination..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <p id="terminationMessage" style="width: 100%; margin-bottom: 10px; font-size: 14px;"></p>
+                <button type="submit" class="btn btn-danger btn-navy">
+                  <i class="fa-solid fa-user-xmark"></i> Process Termination
+                </button>
+                <button type="reset" class="btn btn-secondary btn-navy">
+                  <i class="fa-solid fa-undo"></i> Clear Form
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Client Termination Details</h2>
+          <button type="button" class="modal-close" onclick="closeDetailModal()">&times;</button>
+        </div>
+        <div id="detailContent" style="display: flex; flex-direction: column; gap: 15px;"></div>
+      </div>
+    </div>
+
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      let allLeftClients = [];
+      let closeConnectionRequests = [];
+      let selectedClientData = null;
+      let activeCloseRequestId = null;
+
+      const filterDateFrom = document.getElementById('filter-date-from');
+      const filterDateTo = document.getElementById('filter-date-to');
+      const filterReason = document.getElementById('filter-reason');
+      const filterPackage = document.getElementById('filter-package');
+      const filterSearch = document.getElementById('filter-search');
+      const applyFilterBtn = document.getElementById('applyFilterBtn');
+      const clearFilterBtn = document.getElementById('clearFilterBtn');
+      const exportExcelBtn = document.getElementById('exportExcelBtn');
+      const tableBody = document.getElementById('leftClientTableBody');
+      const closeRequestTableBody = document.getElementById('closeRequestTableBody');
+      const terminationForm = document.getElementById('terminationForm');
+      const clientSearch = document.getElementById('client-search');
+      const clientSearchResults = document.getElementById('clientSearchResults');
+      const selectedClientId = document.getElementById('selected-client-id');
+      const terminationMessage = document.getElementById('terminationMessage');
+      const terminationAccessText = document.getElementById('terminationAccessText');
+      const debouncedClientSearch = debounce(searchClients, 300);
+      let canTerminate = true;
+
+      applyFilterBtn.addEventListener('click', filterClients);
+      clearFilterBtn.addEventListener('click', clearFilters);
+      exportExcelBtn.addEventListener('click', exportToExcel);
+      terminationForm.addEventListener('submit', processTermination);
+      clientSearch.addEventListener('input', (event) => {
+        debouncedClientSearch(event.target.value.trim());
+      });
+
+      async function ensureAuth() {
+        try {
+          const res = await fetch('backend/public/auth/me.php', { credentials: 'same-origin' });
+          if (!res.ok) window.location.href = 'login.html';
+          return res.ok;
+        } catch { window.location.href = 'login.html'; }
+      }
+
+      async function loadLeftClients() {
+        try {
+          const params = new URLSearchParams();
+          if (filterDateFrom.value) params.set('from_date', filterDateFrom.value);
+          if (filterDateTo.value) params.set('to_date', filterDateTo.value);
+          if (filterReason.value) params.set('reason', filterReason.value);
+          if (filterPackage.value) params.set('package', filterPackage.value);
+          if (filterSearch.value.trim()) params.set('search', filterSearch.value.trim());
+
+          const res = await fetch('backend/public/clients/list_left.php?' + params.toString(), { credentials: 'same-origin' });
+          const data = await res.json();
+          if (data.ok) {
+            allLeftClients = data.clients;
+            updateStats(data.stats);
+            renderTable(allLeftClients);
+            await loadCloseRequests();
+            canTerminate = Boolean(data.can_terminate);
+            setTerminationAccess(canTerminate);
+          } else {
+            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px; color:#dc2626;">${data.message}</td></tr>`;
+            closeRequestTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#dc2626;">Failed to load close requests</td></tr>';
+            setTerminationAccess(false);
+          }
+        } catch (error) {
+          tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px; color:#dc2626;">Failed to load clients</td></tr>`;
+          closeRequestTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#dc2626;">Failed to load close requests</td></tr>';
+          setTerminationAccess(false);
+        }
+      }
+
+      async function loadCloseRequests() {
+        try {
+          const res = await fetch('backend/public/clients/service_requests_list.php?kind=close_connection&status=pending', { credentials: 'same-origin' });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            closeRequestTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#dc2626;">${escapeHtml(data.message || 'Failed to load close requests')}</td></tr>`;
+            return;
+          }
+
+          closeConnectionRequests = Array.isArray(data.requests) ? data.requests : [];
+          renderCloseRequestTable(closeConnectionRequests);
+        } catch (error) {
+          closeRequestTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#dc2626;">Failed to load close requests</td></tr>';
+        }
+      }
+
+      function renderCloseRequestTable(rows) {
+        if (!rows.length) {
+          closeRequestTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No pending close requests</td></tr>';
+          return;
+        }
+
+        closeRequestTableBody.innerHTML = rows.map((r) => {
+          const reason = r.termination_reason || 'other';
+          const reasonBadge = `<span class="reason-badge ${escapeHtml(reason)}">${escapeHtml(reason)}</span>`;
+          const statusBadge = `<span class="status-badge ${escapeHtml(r.status)}">${escapeHtml(String(r.status || '').replace('_', ' '))}</span>`;
+          return `
+            <tr>
+              <td><strong>${escapeHtml(r.request_code || '-')}</strong></td>
+              <td>${escapeHtml((r.full_name || '-') + ' (' + (r.client_code || '-') + ')')}</td>
+              <td>${escapeHtml(r.phone || '-')}</td>
+              <td>${escapeHtml(r.effective_date || '-')}</td>
+              <td>${reasonBadge}</td>
+              <td>${statusBadge}</td>
+              <td>
+                ${canTerminate
+                  ? `<button class="btn btn-sm btn-navy" type="button" onclick="startCloseRequestProcess(${Number(r.id)}, ${Number(r.client_id)})"><i class="fa-solid fa-pen"></i> Process</button>`
+                  : '<span style="font-size:12px;color:#64748b;">View only</span>'}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      async function startCloseRequestProcess(requestId, clientId) {
+        const req = closeConnectionRequests.find((r) => Number(r.id) === Number(requestId));
+        if (!req) {
+          setMessage('Selected request not found', true);
+          return;
+        }
+
+        activeCloseRequestId = Number(requestId);
+        selectedClientId.value = String(clientId);
+        clientSearch.value = `${req.client_code || '-'} - ${req.full_name || '-'}`;
+        document.getElementById('termination-date').value = req.effective_date || new Date().toISOString().split('T')[0];
+        document.getElementById('termination-reason').value = req.termination_reason || 'other';
+        const combinedNotes = [req.reason || '', req.notes || ''].filter(Boolean).join(' | ');
+        document.getElementById('termination-notes').value = combinedNotes;
+
+        if (canTerminate) {
+          await updateCloseRequestStatus(requestId, 'in_progress', 'Opened in termination form');
+        }
+
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        setMessage('Close request loaded into termination form', false);
+      }
+
+      async function updateCloseRequestStatus(requestId, status, notes) {
+        try {
+          const res = await fetch('backend/public/clients/service_requests_update_status.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ request_id: Number(requestId), status, notes }),
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            setMessage(data.message || 'Failed to update close request status', true);
+            return false;
+          }
+
+          return true;
+        } catch (error) {
+          setMessage('Failed to update close request status', true);
+          return false;
+        }
+      }
+
+      function setTerminationAccess(enabled) {
+        const fields = terminationForm.querySelectorAll('input, select, textarea, button');
+        fields.forEach(field => field.disabled = !enabled);
+        terminationAccessText.textContent = enabled ? 'You can process terminations' : 'View-only access (no terminate permission)';
+        terminationAccessText.style.color = enabled ? '#0f766e' : '#b42318';
+      }
+
+      function updateStats(stats) {
+        document.getElementById('totalLeftClients').textContent = stats.total_left || 0;
+        document.getElementById('thisMonthLeft').textContent = stats.this_month_left || 0;
+        document.getElementById('totalDues').textContent = (stats.total_dues || 0) + ' BDT';
+        document.getElementById('equipmentPending').textContent = stats.equipment_pending || 0;
+      }
+
+      function renderTable(clients) {
+        if (clients.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No left clients found</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = clients.map(c => {
+          const reasonBadge = `<span class="reason-badge ${c.termination_reason}">${c.termination_reason}</span>`;
+          const equipBadge = `<span class="status-badge ${c.equipment_status}">${c.equipment_status === 'returned' ? 'Returned' : c.equipment_status === 'partial' ? 'Partial' : 'Not Returned'}</span>`;
+          return `
+            <tr>
+              <td><strong>${c.client_code || '-'}</strong></td>
+              <td>${c.full_name || '-'}</td>
+              <td>${c.phone || '-'}</td>
+              <td>${c.package_name || '-'}</td>
+              <td>${c.connection_start_date || '-'}</td>
+              <td>${c.termination_date || '-'}</td>
+              <td>${reasonBadge}</td>
+              <td>${c.pending_dues || 0} BDT</td>
+              <td>${equipBadge}</td>
+              <td><button class="btn btn-sm btn-navy" onclick="viewDetails(${c.id})"><i class="fa-solid fa-eye"></i> View</button></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      function filterClients() {
+        loadLeftClients();
+      }
+
+      function clearFilters() {
+        filterDateFrom.value = '';
+        filterDateTo.value = '';
+        filterReason.value = '';
+        filterPackage.value = '';
+        filterSearch.value = '';
+        loadLeftClients();
+      }
+
+      async function searchClients(query) {
+        if (query.length < 2) {
+          clientSearchResults.innerHTML = '';
+          clientSearchResults.classList.remove('active');
+          return;
+        }
+
+        try {
+          const res = await fetch(`backend/public/clients/search_active.php?q=${encodeURIComponent(query)}`, { credentials: 'same-origin' });
+          const data = await res.json();
+
+          if (!res.ok || !data.ok) {
+            const message = data.message || 'Unable to search clients';
+            clientSearchResults.innerHTML = `<div class="search-result-item" style="cursor:default; color:red;">${message}</div>`;
+            clientSearchResults.classList.add('active');
+            return;
+          }
+          
+          if (data.clients.length > 0) {
+            clientSearchResults.innerHTML = data.clients.map(c => `
+              <div class="search-result-item" data-client-id="${c.id}" data-client-code="${escapeHtml(c.client_code)}" data-client-name="${escapeHtml(c.full_name)}">
+                <strong>${escapeHtml(c.client_code)}</strong> - ${escapeHtml(c.full_name)} (${escapeHtml(c.phone)})
+              </div>
+            `).join('');
+            clientSearchResults.classList.add('active');
+          } else {
+            clientSearchResults.innerHTML = '<div class="search-result-item" style="cursor:default;">No clients found</div>';
+            clientSearchResults.classList.add('active');
+          }
+        } catch (error) {
+          clientSearchResults.innerHTML = '<div class="search-result-item" style="cursor:default; color:red;">Error searching clients</div>';
+          clientSearchResults.classList.add('active');
+        }
+      }
+
+      function selectClient(clientId, code, name) {
+        clientSearch.value = `${code} - ${name}`;
+        selectedClientId.value = clientId;
+        clientSearchResults.classList.remove('active');
+      }
+
+      async function processTermination(event) {
+        event.preventDefault();
+
+        if (!canTerminate) {
+          setMessage('You do not have permission to process terminations', true);
+          return;
+        }
+
+        const clientId = parseInt(selectedClientId.value);
+        if (!clientId) {
+          setMessage('Please select a client', true);
+          return;
+        }
+
+        const payload = {
+          client_id: clientId,
+          termination_date: document.getElementById('termination-date').value,
+          termination_reason: document.getElementById('termination-reason').value,
+          pending_dues: parseFloat(document.getElementById('pending-dues').value) || 0,
+          equipment_status: document.getElementById('equipment-returned').value,
+          notes: document.getElementById('termination-notes').value.trim(),
+        };
+
+        setMessage('Processing termination...', false);
+
+        try {
+          const res = await fetch('backend/public/clients/terminate.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+          if (data.ok) {
+            if (activeCloseRequestId) {
+              await updateCloseRequestStatus(activeCloseRequestId, 'completed', 'Termination processed');
+            }
+            setMessage('Client termination processed successfully', false);
+            terminationForm.reset();
+            selectedClientId.value = '';
+            clientSearch.value = '';
+            activeCloseRequestId = null;
+            await loadLeftClients();
+          } else {
+            setMessage(data.message || 'Failed to process termination', true);
+          }
+        } catch (error) {
+          setMessage('Server error occurred', true);
+        }
+      }
+
+      function setMessage(text, isError) {
+        terminationMessage.textContent = text;
+        terminationMessage.style.color = isError ? '#dc2626' : '#15803d';
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text == null ? '' : String(text);
+        return div.innerHTML;
+      }
+
+      function viewDetails(leftClientId) {
+        const client = allLeftClients.find(c => c.id === leftClientId);
+        if (!client) return;
+
+        const html = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div><strong>Client Code:</strong> ${client.client_code}</div>
+            <div><strong>Name:</strong> ${client.full_name}</div>
+            <div><strong>Phone:</strong> ${client.phone}</div>
+            <div><strong>Email:</strong> ${client.email || '-'}</div>
+            <div><strong>Previous Package:</strong> ${client.package_name}</div>
+            <div><strong>Join Date:</strong> ${client.connection_start_date}</div>
+            <div><strong>Termination Date:</strong> ${client.termination_date}</div>
+            <div><strong>Termination Reason:</strong> ${client.termination_reason}</div>
+            <div><strong>Pending Dues:</strong> ${client.pending_dues} BDT</div>
+            <div><strong>Equipment Status:</strong> ${client.equipment_status}</div>
+            <div><strong>Final Reading:</strong> ${client.final_reading || '-'}</div>
+            ${client.notes ? `<div style="grid-column: 1/-1;"><strong>Notes:</strong> ${client.notes}</div>` : ''}
+          </div>
+        `;
+        document.getElementById('detailContent').innerHTML = html;
+        document.getElementById('detailModal').classList.add('active');
+      }
+
+      function closeDetailModal() {
+        document.getElementById('detailModal').classList.remove('active');
+      }
+
+      function exportToExcel() {
+        if (allLeftClients.length === 0) { alert('No data to export'); return; }
+        const headers = ['Code', 'Name', 'Phone', 'Email', 'Package', 'Joined', 'Left Date', 'Reason', 'Pending Dues', 'Equipment'];
+        const rows = allLeftClients.map(c => [
+          c.client_code,
+          c.full_name,
+          c.phone,
+          c.email,
+          c.package_name,
+          c.connection_start_date,
+          c.termination_date,
+          c.termination_reason,
+          c.pending_dues,
+          c.equipment_status,
+        ]);
+
+        const csv = [
+          headers.join(','),
+          ...rows.map((row) => row.map((cell) => '"' + String(cell == null ? '' : cell).replace(/"/g, '""') + '"').join(','))
+        ].join('\n');
+
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'left_clients_' + new Date().getTime() + '.csv';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func(...args), wait);
+        };
+      }
+
+      clientSearchResults.addEventListener('click', (event) => {
+        const item = event.target.closest('.search-result-item[data-client-id]');
+        if (!item) return;
+        selectClient(item.getAttribute('data-client-id'), item.getAttribute('data-client-code'), item.getAttribute('data-client-name'));
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.client-search-wrap')) {
+          clientSearchResults.classList.remove('active');
+        }
+      });
+
+      [filterDateFrom, filterDateTo, filterReason, filterPackage].forEach(el => {
+        el.addEventListener('change', filterClients);
+      });
+      filterSearch.addEventListener('input', debounce(filterClients, 250));
+
+      (async function () {
+        const loggedIn = await ensureAuth();
+        if (loggedIn) await loadLeftClients();
+      })();
+    </script>
+  </body>
+</html>
+
+
+
+

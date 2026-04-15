@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - Service History</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="app-header"></div>
+<div class="main-content">
+<div class="page-content">
+        <div class="content-header">
+          <h1>Service History</h1>
+          <p>Chronological record of all client service events</p>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 12px 0 12px">
+            <input id="historySearch" type="text" placeholder="Search by ticket, client, phone, category" style="min-width:240px;flex:1;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px" />
+            <select id="historyStatus" style="border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
+              <option value="closed">Closed</option>
+              <option value="resolved">Resolved</option>
+              <option value="all">Resolved + Closed</option>
+            </select>
+            <button id="historyRefresh" style="border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:8px 10px;cursor:pointer">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Phone</th>
+                <th>Category</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr><td colspan="6">Loading service history...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      let historyDebounce = null;
+
+      function esc(v) {
+        return String(v == null ? "" : v)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function fmtDateTime(value) {
+        if (!value) return "-";
+        const date = new Date(String(value).replace(" ", "T"));
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      async function loadServiceHistory() {
+        const tbody = document.getElementById("historyBody");
+        const status = document.getElementById("historyStatus").value || "closed";
+        const search = (document.getElementById("historySearch").value || "").trim();
+
+        tbody.innerHTML = '<tr><td colspan="6">Loading service history...</td></tr>';
+        try {
+          const params = new URLSearchParams();
+          params.set("limit", "300");
+          if (status !== "all") {
+            params.set("status", status);
+          }
+          if (search) {
+            params.set("search", search);
+          }
+
+          const res = await fetch("backend/public/support/tickets_customer_list.php?" + params.toString(), {
+            credentials: "same-origin",
+            cache: "no-store",
+          });
+          const data = await res.json();
+          if (!res.ok || !data || data.ok === false) {
+            throw new Error((data && data.message) || "Failed to load service history");
+          }
+
+          const rows = Array.isArray(data.tickets) ? data.tickets : [];
+          if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="6">No closed/resolved tickets found.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = rows.map((r) => {
+            const statusLabel = String(r.status || "").toLowerCase();
+            return '<tr>'
+              + '<td>#' + esc(r.ticket_no || "N/A") + '</td>'
+              + '<td>' + esc(fmtDateTime(r.updated_at || r.created_at)) + '</td>'
+              + '<td>' + esc(r.client_name || "Unknown") + ' (' + esc(r.client_code || "N/A") + ')</td>'
+              + '<td>' + esc(r.client_phone || "N/A") + '</td>'
+              + '<td>' + esc(r.category || "General") + '</td>'
+              + '<td><span class="status-badge completed">' + esc(statusLabel.replace(/_/g, " ")) + '</span></td>'
+              + '</tr>';
+          }).join("");
+        } catch (err) {
+          tbody.innerHTML = '<tr><td colspan="6">' + esc(err.message || "Failed to load service history") + '</td></tr>';
+        }
+      }
+
+      document.getElementById("historyRefresh").addEventListener("click", loadServiceHistory);
+      document.getElementById("historyStatus").addEventListener("change", loadServiceHistory);
+      document.getElementById("historySearch").addEventListener("input", () => {
+        clearTimeout(historyDebounce);
+        historyDebounce = setTimeout(loadServiceHistory, 250);
+      });
+
+      loadServiceHistory();
+    </script>
+  </body>
+</html>
+
+
+
+

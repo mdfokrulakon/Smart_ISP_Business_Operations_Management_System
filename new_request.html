@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - New Request</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      :root {
+        --rq-bg-1: #f6f4ef;
+        --rq-bg-2: #ebe7de;
+        --rq-ink: #11212f;
+        --rq-muted: #5e6b77;
+        --rq-card: #ffffff;
+        --rq-accent: #cc5f2f;
+        --rq-accent-2: #0e7c86;
+        --rq-success: #198754;
+        --rq-warning: #a46300;
+        --rq-danger: #b42318;
+        --rq-ring: rgba(14, 124, 134, 0.25);
+      }
+
+      .request-shell {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 8% 14%, rgba(204, 95, 47, 0.12), transparent 32%),
+          radial-gradient(circle at 92% 0%, rgba(14, 124, 134, 0.16), transparent 30%),
+          linear-gradient(160deg, var(--rq-bg-1) 0%, var(--rq-bg-2) 100%);
+        animation: breatheBg 12s ease-in-out infinite;
+      }
+
+      .request-shell::before,
+      .request-shell::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+        filter: blur(2px);
+      }
+
+      .request-shell::before {
+        width: 280px;
+        height: 280px;
+        top: -90px;
+        right: -60px;
+        background: rgba(204, 95, 47, 0.18);
+        animation: driftA 16s ease-in-out infinite;
+      }
+
+      .request-shell::after {
+        width: 220px;
+        height: 220px;
+        bottom: -90px;
+        left: -50px;
+        background: rgba(14, 124, 134, 0.17);
+        animation: driftB 18s ease-in-out infinite;
+      }
+
+      .request-hero {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .request-hero h1 {
+        margin: 0 0 8px;
+        color: var(--rq-ink);
+        letter-spacing: 0.2px;
+      }
+
+      .request-hero p {
+        margin: 0;
+        color: var(--rq-muted);
+        font-size: 14px;
+      }
+
+      .request-role-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 9px 14px;
+        background: rgba(17, 33, 47, 0.06);
+        color: var(--rq-ink);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .request-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1.2fr 0.95fr;
+        gap: 18px;
+      }
+
+      .request-card {
+        background: var(--rq-card);
+        border: 1px solid rgba(17, 33, 47, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 14px 40px rgba(10, 18, 28, 0.08);
+        transform: translateY(18px);
+        opacity: 0;
+        animation: cardIn 0.55s ease forwards;
+      }
+
+      .request-card:nth-child(2) {
+        animation-delay: 0.12s;
+      }
+
+      .request-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(17, 33, 47, 0.08);
+        padding: 16px 18px;
+      }
+
+      .request-card-header h3 {
+        margin: 0;
+        color: var(--rq-ink);
+        font-size: 16px;
+      }
+
+      .request-card-body {
+        padding: 18px;
+      }
+
+      .request-form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .request-form .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .request-form label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--rq-ink);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+
+      .request-form input,
+      .request-form select,
+      .request-form textarea,
+      .request-filter input,
+      .request-filter select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(17, 33, 47, 0.18);
+        background: #fff;
+        font-size: 14px;
+        padding: 11px 12px;
+        color: var(--rq-ink);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      }
+
+      .request-form input:focus,
+      .request-form select:focus,
+      .request-form textarea:focus,
+      .request-filter input:focus,
+      .request-filter select:focus {
+        border-color: var(--rq-accent-2);
+        box-shadow: 0 0 0 4px var(--rq-ring);
+        outline: none;
+        transform: translateY(-1px);
+      }
+
+      .request-actions {
+        margin-top: 4px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .request-btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      }
+
+      .request-btn:active {
+        transform: translateY(1px);
+      }
+
+      .request-btn-primary {
+        color: #fff;
+        background: linear-gradient(120deg, var(--rq-accent) 0%, #d27731 100%);
+        box-shadow: 0 10px 20px rgba(204, 95, 47, 0.3);
+      }
+
+      .request-btn-secondary {
+        color: #193345;
+        background: rgba(14, 124, 134, 0.14);
+      }
+
+      .request-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .request-filter {
+        display: grid;
+        grid-template-columns: 1fr 170px;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .request-list {
+        max-height: 490px;
+        overflow: auto;
+        padding-right: 4px;
+      }
+
+      .request-item {
+        border: 1px solid rgba(17, 33, 47, 0.08);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: linear-gradient(170deg, #fff, #fcfcfb);
+      }
+
+      .request-item-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .request-item h4 {
+        margin: 0;
+        color: var(--rq-ink);
+        font-size: 15px;
+      }
+
+      .request-meta {
+        color: var(--rq-muted);
+        font-size: 12px;
+        display: grid;
+        gap: 4px;
+      }
+
+      .status-badge {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+      }
+
+      .status-pending {
+        color: #784a03;
+        background: #ffe8b6;
+      }
+
+      .status-scheduled {
+        color: #0f5067;
+        background: #caedf8;
+      }
+
+      .status-completed {
+        color: #0f6d3d;
+        background: #ceefdb;
+      }
+
+      .status-cancelled {
+        color: #7a1b1b;
+        background: #f7c7c7;
+      }
+
+      .stats-grid {
+        position: relative;
+        z-index: 1;
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stat-card {
+        border-radius: 14px;
+        padding: 14px;
+        color: #fff !important;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .stats-grid .stat-card:nth-child(1) { background: linear-gradient(135deg, #7b4f00, #a46300) !important; }
+      .stats-grid .stat-card:nth-child(2) { background: linear-gradient(135deg, #0e6177, #0c8892) !important; }
+      .stats-grid .stat-card:nth-child(3) { background: linear-gradient(135deg, #0f6f3e, #1a9256) !important; }
+      .stats-grid .stat-card:nth-child(4) { background: linear-gradient(135deg, #2a4f94, #386fc8) !important; }
+
+      .stats-grid .stat-card .stat-icon {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+      }
+
+      .stats-grid .stat-card .stat-info h3,
+      .stats-grid .stat-card .stat-info p,
+      .stats-grid .stat-card .stat-info {
+        color: #ffffff !important;
+      }
+
+      .stat-card h3 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .stat-card p {
+        margin: 2px 0 0;
+        opacity: 0.92;
+        font-size: 12px;
+      }
+
+      .request-skeleton {
+        height: 82px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #eceae4 25%, #f6f4ef 50%, #eceae4 75%);
+        background-size: 300% 100%;
+        animation: shimmer 1.25s infinite;
+      }
+
+      .request-empty,
+      .request-warning {
+        text-align: center;
+        padding: 24px 12px;
+        border-radius: 10px;
+        background: #f7f6f2;
+        color: var(--rq-muted);
+        border: 1px dashed rgba(17, 33, 47, 0.2);
+      }
+
+      .request-warning {
+        color: #8a230f;
+        background: #fff1ee;
+      }
+
+      .request-toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        min-width: 220px;
+        max-width: 340px;
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: #fff;
+        z-index: 1300;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2);
+      }
+
+      .request-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .request-toast.success { background: var(--rq-success); }
+      .request-toast.error { background: var(--rq-danger); }
+      .request-toast.info { background: #335c7d; }
+
+      @keyframes cardIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes shimmer {
+        from { background-position: 100% 0; }
+        to { background-position: -100% 0; }
+      }
+
+      @keyframes driftA {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-18px, 16px); }
+      }
+
+      @keyframes driftB {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(16px, -14px); }
+      }
+
+      @keyframes breatheBg {
+        0%, 100% { background-size: 100% 100%; }
+        50% { background-size: 102% 102%; }
+      }
+
+      @media (max-width: 1080px) {
+        .request-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 768px) {
+        .request-shell {
+          border-radius: 14px;
+          padding: 14px;
+        }
+
+        .request-form .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .request-filter {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .request-hero {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+
+    <div class="main-content">
+      <div class="page-content">
+        <div class="request-shell">
+          <div class="request-hero">
+            <div>
+              <h1><i class="fa-solid fa-user-plus"></i> New Connection Request</h1>
+              <p>Submit, track, and filter connection requests with role-aware access and a live dashboard.</p>
+            </div>
+            <div class="request-role-pill" id="rolePill"><i class="fa-solid fa-user-shield"></i> Checking access...</div>
+          </div>
+
+          <div class="request-grid">
+            <div class="request-card">
+              <div class="request-card-header">
+                <h3><i class="fa-solid fa-file-lines"></i> Request Details</h3>
+                <small id="formStatusText">Ready to submit</small>
+              </div>
+              <div class="request-card-body">
+                <form class="request-form" id="requestForm">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="client-name">Client Name *</label>
+                      <input type="text" id="client-name" required placeholder="Enter client name" maxlength="150" />
+                    </div>
+                    <div class="form-group">
+                      <label for="client-phone">Phone Number *</label>
+                      <input type="tel" id="client-phone" required placeholder="Enter phone number" maxlength="40" />
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="client-email">Email Address</label>
+                      <input type="email" id="client-email" placeholder="Enter email address" maxlength="180" />
+                    </div>
+                    <div class="form-group">
+                      <label for="client-address">Installation Address *</label>
+                      <input type="text" id="client-address" required placeholder="Enter installation address" maxlength="255" />
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="package-type">Package Type *</label>
+                      <select id="package-type" required>
+                        <option value="">Loading packages...</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="connection-type">Connection Type *</label>
+                      <select id="connection-type" required>
+                        <option value="">Select Type</option>
+                        <option value="fiber">Fiber Optic</option>
+                        <option value="wireless">Wireless</option>
+                        <option value="copper">Copper</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="preferred-date">Preferred Installation Date *</label>
+                      <input type="date" id="preferred-date" required />
+                    </div>
+                    <div class="form-group">
+                      <label for="preferred-time">Preferred Time Slot *</label>
+                      <select id="preferred-time" required>
+                        <option value="">Select Time</option>
+                        <option value="morning">Morning (9AM - 12PM)</option>
+                        <option value="afternoon">Afternoon (12PM - 4PM)</option>
+                        <option value="evening">Evening (4PM - 7PM)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="notes">Additional Notes</label>
+                    <textarea id="notes" rows="4" placeholder="Any special requirements or instructions..." maxlength="5000"></textarea>
+                  </div>
+
+                  <div class="request-actions">
+                    <button type="submit" class="request-btn request-btn-primary" id="submitBtn">
+                      <i class="fa-solid fa-check"></i> Submit Request
+                    </button>
+                    <button type="reset" class="request-btn request-btn-secondary" id="resetBtn">
+                      <i class="fa-solid fa-rotate-left"></i> Clear Form
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="request-card">
+              <div class="request-card-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Requests</h3>
+                <small id="listCountText">0 loaded</small>
+              </div>
+              <div class="request-card-body">
+                <div class="request-filter">
+                  <input type="text" id="requestSearch" placeholder="Search by name, phone, code, address..." />
+                  <select id="requestStatusFilter">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="request-list" id="requestList"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+              <div class="stat-info"><h3 id="statPending">0</h3><p>Pending Requests</p></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+              <div class="stat-info"><h3 id="statScheduled">0</h3><p>Scheduled Requests</p></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+              <div class="stat-info"><h3 id="statCompleted">0</h3><p>Completed Requests</p></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+              <div class="stat-info"><h3 id="statTotal">0</h3><p>Total Requests</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      const requestForm = document.getElementById('requestForm');
+      const requestList = document.getElementById('requestList');
+      const requestSearch = document.getElementById('requestSearch');
+      const requestStatusFilter = document.getElementById('requestStatusFilter');
+      const packageTypeSelect = document.getElementById('package-type');
+      const submitBtn = document.getElementById('submitBtn');
+      const formStatusText = document.getElementById('formStatusText');
+      const rolePill = document.getElementById('rolePill');
+      const listCountText = document.getElementById('listCountText');
+
+      const statPending = document.getElementById('statPending');
+      const statScheduled = document.getElementById('statScheduled');
+      const statCompleted = document.getElementById('statCompleted');
+      const statTotal = document.getElementById('statTotal');
+
+      let requestLoadTimer = null;
+      let canCreateRequests = true;
+      let canCreateByPermission = true;
+      let hasPackageOptions = false;
+
+      function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = 'request-toast ' + type;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        window.requestAnimationFrame(() => toast.classList.add('show'));
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => toast.remove(), 220);
+        }, 2700);
+      }
+
+      function escapeHtml(value) {
+        const div = document.createElement('div');
+        div.textContent = value == null ? '' : String(value);
+        return div.innerHTML;
+      }
+
+      function statusBadge(status) {
+        const safeStatus = ['pending', 'scheduled', 'completed', 'cancelled'].includes(status) ? status : 'pending';
+        return '<span class="status-badge status-' + safeStatus + '">' + safeStatus + '</span>';
+      }
+
+      function prettyDate(value) {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleDateString();
+      }
+
+      function relativeTime(value) {
+        if (!value) return '-';
+        const created = new Date(value).getTime();
+        if (Number.isNaN(created)) return '-';
+        const diffSec = Math.max(1, Math.floor((Date.now() - created) / 1000));
+        if (diffSec < 60) return diffSec + ' sec ago';
+        const diffMin = Math.floor(diffSec / 60);
+        if (diffMin < 60) return diffMin + ' min ago';
+        const diffHr = Math.floor(diffMin / 60);
+        if (diffHr < 24) return diffHr + ' hr ago';
+        const diffDay = Math.floor(diffHr / 24);
+        return diffDay + ' day ago';
+      }
+
+      function setFormEnabled(enabled) {
+        canCreateRequests = enabled;
+        const fields = requestForm.querySelectorAll('input, select, textarea, button');
+        fields.forEach(el => {
+          if (el.id === 'requestSearch' || el.id === 'requestStatusFilter') return;
+          if (el.id === 'resetBtn' && !enabled) {
+            el.disabled = true;
+            return;
+          }
+          el.disabled = !enabled;
+        });
+      }
+
+      function applyFormAccess() {
+        setFormEnabled(canCreateByPermission && hasPackageOptions);
+      }
+
+      function renderRequestList(items) {
+        if (!Array.isArray(items) || items.length === 0) {
+          requestList.innerHTML = '<div class="request-empty"><i class="fa-regular fa-folder-open"></i><br />No requests match your filter.</div>';
+          listCountText.textContent = '0 loaded';
+          return;
+        }
+
+        requestList.innerHTML = items.map(item => {
+          return (
+            '<div class="request-item">' +
+              '<div class="request-item-top">' +
+                '<div>' +
+                  '<h4>' + escapeHtml(item.client_name || '-') + '</h4>' +
+                  '<div style="font-size:11px;color:#637080;">' + escapeHtml(item.request_code || '-') + '</div>' +
+                '</div>' +
+                statusBadge((item.status || '').toLowerCase()) +
+              '</div>' +
+              '<div class="request-meta">' +
+                '<div><i class="fa-solid fa-phone"></i> ' + escapeHtml(item.phone || '-') + '</div>' +
+                '<div><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(item.address_line || '-') + '</div>' +
+                '<div><i class="fa-solid fa-wifi"></i> ' + escapeHtml(item.package_name || item.package_slug || '-') + ' | ' + escapeHtml(item.connection_type || '-') + '</div>' +
+                '<div><i class="fa-solid fa-calendar-days"></i> ' + prettyDate(item.preferred_date) + ' | ' + escapeHtml(item.preferred_time || '-') + '</div>' +
+                '<div><i class="fa-regular fa-clock"></i> ' + relativeTime(item.created_at) + '</div>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join('');
+
+        listCountText.textContent = items.length + ' loaded';
+      }
+
+      function renderSkeletons() {
+        requestList.innerHTML = '<div class="request-skeleton"></div><div class="request-skeleton"></div><div class="request-skeleton"></div>';
+      }
+
+      function updateStats(stats) {
+        statPending.textContent = String(stats?.pending || 0);
+        statScheduled.textContent = String(stats?.scheduled || 0);
+        statCompleted.textContent = String(stats?.completed || 0);
+        statTotal.textContent = String(stats?.total || 0);
+      }
+
+      function setPackageOptions(packages) {
+        packageTypeSelect.innerHTML = '<option value="">Select Package</option>';
+        packages.forEach(pkg => {
+          const option = document.createElement('option');
+          option.value = pkg.package_slug;
+          option.textContent = pkg.package_label || pkg.package_name || pkg.package_slug;
+          packageTypeSelect.appendChild(option);
+        });
+      }
+
+      async function loadPackages() {
+        packageTypeSelect.disabled = true;
+        packageTypeSelect.innerHTML = '<option value="">Loading packages...</option>';
+
+        try {
+          const res = await fetch('backend/public/clients/packages.php?_=' + Date.now(), { credentials: 'same-origin' });
+          const data = await res.json();
+
+          if (!res.ok || !data.ok) {
+            throw new Error(data.message || 'Failed to fetch packages');
+          }
+
+          const packages = Array.isArray(data.packages) ? data.packages.filter(pkg => pkg && pkg.package_slug) : [];
+          if (packages.length === 0) {
+            hasPackageOptions = false;
+            packageTypeSelect.innerHTML = '<option value="">No active package found</option>';
+            applyFormAccess();
+            formStatusText.textContent = 'No active package found';
+            return;
+          }
+
+          setPackageOptions(packages);
+          hasPackageOptions = true;
+          packageTypeSelect.disabled = false;
+          applyFormAccess();
+        } catch (error) {
+          hasPackageOptions = false;
+          packageTypeSelect.innerHTML = '<option value="">Unable to load packages</option>';
+          applyFormAccess();
+          formStatusText.textContent = 'Package loading failed';
+          showToast('Unable to load package list from database', 'error');
+        }
+      }
+
+      async function loadUser() {
+        try {
+          const res = await fetch('backend/public/auth/me.php', { credentials: 'same-origin' });
+          if (!res.ok) {
+            window.location.href = 'login.html';
+            return;
+          }
+          const data = await res.json();
+          const roleName = data?.user?.role_name || 'Unknown';
+          rolePill.innerHTML = '<i class="fa-solid fa-user-shield"></i> Role: ' + escapeHtml(roleName);
+        } catch (error) {
+          window.location.href = 'login.html';
+        }
+      }
+
+      async function loadRequests() {
+        renderSkeletons();
+
+        const params = new URLSearchParams();
+        const searchVal = requestSearch.value.trim();
+        const statusVal = requestStatusFilter.value.trim();
+        if (searchVal !== '') params.set('search', searchVal);
+        if (statusVal !== '') params.set('status', statusVal);
+        params.set('limit', '80');
+
+        try {
+          const res = await fetch('backend/public/clients/requests_list.php?' + params.toString(), { credentials: 'same-origin' });
+          const data = await res.json();
+
+          if (!res.ok || !data.ok) {
+            if (res.status === 403) {
+              canCreateByPermission = false;
+              applyFormAccess();
+              formStatusText.textContent = 'No permission to submit';
+              requestList.innerHTML = '<div class="request-warning">You can access this page, but your current role cannot view request data.</div>';
+              updateStats({ pending: 0, scheduled: 0, completed: 0, total: 0 });
+              return;
+            }
+            requestList.innerHTML = '<div class="request-warning">' + escapeHtml(data.message || 'Failed to load requests') + '</div>';
+            updateStats({ pending: 0, scheduled: 0, completed: 0, total: 0 });
+            return;
+          }
+
+          renderRequestList(data.requests || []);
+          updateStats(data.stats || {});
+
+          const allowCreate = Boolean(data.can_create);
+          canCreateByPermission = allowCreate;
+          applyFormAccess();
+          if (!allowCreate) {
+            formStatusText.textContent = 'View-only access';
+          } else if (!hasPackageOptions) {
+            formStatusText.textContent = 'No active package found';
+          } else {
+            formStatusText.textContent = 'Ready to submit';
+          }
+        } catch (error) {
+          requestList.innerHTML = '<div class="request-warning">Unable to load request data. Please retry.</div>';
+          updateStats({ pending: 0, scheduled: 0, completed: 0, total: 0 });
+        }
+      }
+
+      async function submitRequest(event) {
+        event.preventDefault();
+
+        if (!canCreateRequests) {
+          showToast('You do not have permission to add requests.', 'error');
+          return;
+        }
+
+        const payload = {
+          client_name: document.getElementById('client-name').value.trim(),
+          phone: document.getElementById('client-phone').value.trim(),
+          email: document.getElementById('client-email').value.trim(),
+          address: document.getElementById('client-address').value.trim(),
+          package_slug: document.getElementById('package-type').value,
+          connection_type: document.getElementById('connection-type').value,
+          preferred_date: document.getElementById('preferred-date').value,
+          preferred_time: document.getElementById('preferred-time').value,
+          notes: document.getElementById('notes').value.trim(),
+        };
+
+        submitBtn.disabled = true;
+        const oldText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+        formStatusText.textContent = 'Submitting...';
+
+        try {
+          const res = await fetch('backend/public/clients/requests_create.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+
+          if (!res.ok || !data.ok) {
+            showToast(data.message || 'Submission failed', 'error');
+            formStatusText.textContent = 'Submission failed';
+            return;
+          }
+
+          showToast('Request submitted successfully', 'success');
+          requestForm.reset();
+          formStatusText.textContent = 'Ready to submit';
+          await loadRequests();
+        } catch (error) {
+          showToast('Network error while submitting request', 'error');
+          formStatusText.textContent = 'Submission failed';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = oldText;
+        }
+      }
+
+      function debouncedReload() {
+        clearTimeout(requestLoadTimer);
+        requestLoadTimer = setTimeout(loadRequests, 280);
+      }
+
+      requestForm.addEventListener('submit', submitRequest);
+      requestSearch.addEventListener('input', debouncedReload);
+      requestStatusFilter.addEventListener('change', loadRequests);
+
+      document.getElementById('preferred-date').setAttribute('min', new Date().toISOString().split('T')[0]);
+
+      (async function initPage() {
+        await loadUser();
+        await loadPackages();
+        await loadRequests();
+      })();
+    </script>
+  </body>
+</html>
+
+
+
+

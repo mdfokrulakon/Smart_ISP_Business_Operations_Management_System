@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promee Internet - New Ticket</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        font-family: "Manrope", "Segoe UI", sans-serif;
+      }
+
+      .page-shell {
+        background:
+          radial-gradient(circle at 7% 0%, rgba(125, 211, 252, 0.35) 0%, transparent 30%),
+          radial-gradient(circle at 96% 12%, rgba(14, 165, 233, 0.2) 0%, transparent 35%),
+          linear-gradient(160deg, #edf5ff 0%, #dbeafe 44%, #f0f7ff 100%);
+        min-height: calc(100vh - 60px);
+        padding-bottom: 24px;
+      }
+
+      .hero-ticket {
+        border-radius: 20px;
+        padding: 24px;
+        background: linear-gradient(130deg, #082f49 0%, #0c4a6e 50%, #0369a1 100%);
+        color: #e0f2fe;
+        margin-bottom: 18px;
+        border: 1px solid rgba(125, 211, 252, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-ticket::after {
+        content: "";
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        position: absolute;
+        top: -120px;
+        right: -80px;
+        background: radial-gradient(circle, rgba(191, 219, 254, 0.38) 0%, transparent 72%);
+      }
+
+      .hero-ticket h1 {
+        margin: 0 0 7px;
+        font-size: 30px;
+        font-weight: 800;
+      }
+
+      .hero-ticket p {
+        margin: 0;
+        color: #bae6fd;
+        max-width: 760px;
+        font-size: 14px;
+      }
+
+      .hero-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .hero-tag {
+        border-radius: 999px;
+        border: 1px solid rgba(191, 219, 254, 0.4);
+        background: rgba(15, 23, 42, 0.3);
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .ticket-form-container {
+        width: 100%;
+        margin: 0;
+      }
+
+      .form-header {
+        background: linear-gradient(120deg, #0f172a, #1e3a8a);
+        color: white;
+        padding: 18px 20px;
+        border-radius: 16px 16px 0 0;
+        margin-bottom: 0;
+        border: 1px solid rgba(147, 197, 253, 0.35);
+        border-bottom: none;
+      }
+
+      .form-body {
+        background: rgba(255, 255, 255, 0.98);
+        padding: 30px;
+        border-radius: 0 0 16px 16px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        box-shadow: 0 22px 35px rgba(15, 23, 42, 0.08);
+      }
+
+      .ticket-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 14px;
+      }
+
+      .field-wrap {
+        margin-bottom: 14px;
+      }
+
+      .field-wrap label {
+        display: block;
+        margin-bottom: 6px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .field-wrap input,
+      .field-wrap select,
+      .field-wrap textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 10px 11px;
+        background: #ffffff;
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .field-wrap input:focus,
+      .field-wrap select:focus,
+      .field-wrap textarea:focus {
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.35);
+      }
+
+      .client-search-wrap {
+        position: relative;
+      }
+
+      .client-suggestions {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        width: 100%;
+        max-height: 250px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        box-shadow: 0 16px 28px rgba(15, 23, 42, 0.14);
+        display: none;
+        z-index: 50;
+      }
+
+      .client-suggestions.active {
+        display: block;
+        animation: popIn 0.2s ease;
+      }
+
+      @keyframes popIn {
+        from {
+          transform: translateY(6px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .client-item {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+      }
+
+      .client-item:hover {
+        background: #f0f9ff;
+      }
+
+      .client-item:last-child {
+        border-bottom: none;
+      }
+
+      .client-item b {
+        display: block;
+        color: #0f172a;
+      }
+
+      .client-item span {
+        display: block;
+        margin-top: 2px;
+        color: #64748b;
+        font-size: 12px;
+      }
+
+      .selected-client {
+        border: 1px solid #bae6fd;
+        background: linear-gradient(140deg, #ecfeff 0%, #e0f2fe 100%);
+        border-radius: 12px;
+        padding: 10px;
+        margin-top: 10px;
+        display: none;
+      }
+
+      .selected-client.active {
+        display: block;
+      }
+
+      .selected-client b {
+        color: #0c4a6e;
+      }
+
+      .selected-client p {
+        margin: 2px 0 0;
+        color: #475569;
+        font-size: 12px;
+      }
+
+      .btn-primary {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        cursor: pointer;
+        background: linear-gradient(120deg, #0284c7, #2563eb);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .btn-light {
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        background: #fff;
+        color: #334155;
+        font-weight: 700;
+      }
+
+      .info-side {
+        border: 1px solid #dbeafe;
+        border-radius: 14px;
+        background: linear-gradient(145deg, #f8fbff 0%, #edf7ff 100%);
+        padding: 14px;
+      }
+
+      .info-side h4 {
+        margin: 0 0 10px;
+        color: #0f172a;
+      }
+
+      .flow-step {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px dashed #bfdbfe;
+        background: #fff;
+        margin-bottom: 8px;
+      }
+
+      .flow-step i {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+
+      .flow-step b {
+        display: block;
+        color: #0f172a;
+      }
+
+      .flow-step span {
+        display: block;
+        font-size: 12px;
+        color: #64748b;
+      }
+
+      .create-result {
+        margin-top: 12px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        padding: 10px 12px;
+        display: none;
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .create-result.ok {
+        display: block;
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #166534;
+      }
+
+      .create-result.err {
+        display: block;
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #b91c1c;
+      }
+
+      @media (max-width: 980px) {
+        .ticket-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+<div class="main-content page-shell">
+<div class="page-content">
+        <div class="hero-ticket">
+          <h1>Employee Ticket Creation Desk</h1>
+          <p>Create tickets on behalf of clients and push them directly to the same synced support database used by customer portal and operations ticket board.</p>
+          <div class="hero-tags">
+            <span class="hero-tag">Shared Ticket Database</span>
+            <span class="hero-tag">Live Client Search</span>
+            <span class="hero-tag">Priority Routing</span>
+            <span class="hero-tag">Operations Ready</span>
+          </div>
+        </div>
+
+        <div class="ticket-form-container">
+          <div class="form-header">
+            <h3>
+              <i class="fa-solid fa-plus-circle"></i> Create New Support Ticket
+            </h3>
+          </div>
+          <div class="form-body">
+            <div class="ticket-grid">
+              <div>
+                <div class="field-wrap client-search-wrap">
+                  <label>Find Client (Name / Client ID / Phone)</label>
+                  <input id="clientSearchInput" type="text" placeholder="Type at least 2 characters" autocomplete="off" />
+                  <div id="clientSuggestions" class="client-suggestions"></div>
+                  <div id="selectedClientBox" class="selected-client">
+                    <b id="selectedClientName">-</b>
+                    <p id="selectedClientMeta">-</p>
+                  </div>
+                </div>
+
+                <div class="field-wrap">
+                  <label>Service Type</label>
+                  <select id="serviceTypeInput">
+                    <option>Broadband</option>
+                    <option>Fiber Optic</option>
+                    <option>IPTV</option>
+                    <option>Wireless</option>
+                  </select>
+                </div>
+
+                <div class="field-wrap">
+                  <label>Subject</label>
+                  <input id="subjectInput" type="text" placeholder="Brief summary of the issue" />
+                </div>
+
+                <div class="field-wrap">
+                  <label>Category</label>
+                  <select id="categoryInput">
+                    <option>Technical Issue</option>
+                    <option>Billing Problem</option>
+                    <option>General Inquiry</option>
+                    <option>New Connection</option>
+                    <option>ONU/Device</option>
+                    <option>Package Change</option>
+                  </select>
+                </div>
+
+                <div class="field-wrap">
+                  <label>Priority</label>
+                  <select id="priorityInput">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+
+                <div class="field-wrap">
+                  <label>Problem Description</label>
+                  <textarea id="descriptionInput" rows="6" placeholder="Provide detailed information about the client's problem..."></textarea>
+                </div>
+
+                <div class="field-wrap">
+                  <label>Initial Remark (Shown to Client)</label>
+                  <textarea id="remarksInput" rows="3" placeholder="Optional remark like: Support team has received your request and assigned for checking."></textarea>
+                </div>
+
+                <div class="field-wrap">
+                  <label>Attachment (Optional: Image/PDF up to 5MB)</label>
+                  <input id="attachmentInput" type="file" accept="image/*,.pdf,application/pdf" />
+                </div>
+
+                <div class="form-actions" style="display:flex; gap:10px; margin-top:8px;">
+                  <button id="createTicketBtn" class="btn-primary" type="button">
+                    <i class="fa-solid fa-paper-plane"></i> Create Ticket
+                  </button>
+                  <button class="btn-light" type="button" onclick="window.location.href = 'ticket_list.html'">
+                    <i class="fa fa-list"></i> Back To Ticket List
+                  </button>
+                </div>
+
+                <div id="createResult" class="create-result"></div>
+              </div>
+
+              <div class="info-side">
+                <h4><i class="fa-solid fa-diagram-project"></i> Workflow Sync</h4>
+                <div class="flow-step">
+                  <i class="fa fa-magnifying-glass"></i>
+                  <div>
+                    <b>Select Client</b>
+                    <span>Search active clients by name, client ID, or phone.</span>
+                  </div>
+                </div>
+                <div class="flow-step">
+                  <i class="fa fa-ticket"></i>
+                  <div>
+                    <b>Create Ticket</b>
+                    <span>Ticket is inserted into the same shared support database.</span>
+                  </div>
+                </div>
+                <div class="flow-step">
+                  <i class="fa fa-rotate"></i>
+                  <div>
+                    <b>Auto Synced</b>
+                    <span>Immediately visible in employee ticket list and client portal support page.</span>
+                  </div>
+                </div>
+                <div class="flow-step">
+                  <i class="fa fa-comment-dots"></i>
+                  <div>
+                    <b>Client Update</b>
+                    <span>Initial remark appears to client as admin remark in their portal.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      let selectedClient = null;
+      let searchDebounceId = null;
+
+      async function fetchJson(url, options = {}) {
+        const response = await fetch(url, {
+          credentials: "same-origin",
+          cache: "no-store",
+          ...options,
+        });
+
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || data.ok === false) {
+          const message = data && data.message ? data.message : "Request failed";
+          throw new Error(message);
+        }
+        return data;
+      }
+
+      function renderSuggestions(clients) {
+        const list = document.getElementById("clientSuggestions");
+        if (!list) return;
+
+        if (!Array.isArray(clients) || clients.length === 0) {
+          list.innerHTML = '<div class="client-item"><b>No matching clients</b><span>Try different keyword</span></div>';
+          list.classList.add("active");
+          return;
+        }
+
+        list.innerHTML = clients
+          .map(
+            (client) => `
+              <div class="client-item" data-client='${JSON.stringify(client).replace(/'/g, "&#39;")}'>
+                <b>${client.full_name || "Unknown"}</b>
+                <span>${client.client_code || "N/A"} | ${client.phone || "N/A"} | ${client.package_name || "N/A"} (${Number(client.speed_mbps || 0)} Mbps)</span>
+              </div>
+            `
+          )
+          .join("");
+
+        list.classList.add("active");
+      }
+
+      function selectClient(client) {
+        selectedClient = client || null;
+        const box = document.getElementById("selectedClientBox");
+        const nameEl = document.getElementById("selectedClientName");
+        const metaEl = document.getElementById("selectedClientMeta");
+        const input = document.getElementById("clientSearchInput");
+        const list = document.getElementById("clientSuggestions");
+
+        if (!selectedClient) {
+          box.classList.remove("active");
+          nameEl.textContent = "-";
+          metaEl.textContent = "-";
+          return;
+        }
+
+        input.value = `${selectedClient.full_name || "Unknown"} (${selectedClient.client_code || "N/A"})`;
+        nameEl.textContent = `${selectedClient.full_name || "Unknown"}`;
+        metaEl.textContent = `${selectedClient.client_code || "N/A"} | ${selectedClient.phone || "N/A"} | ${selectedClient.package_name || "N/A"} (${Number(selectedClient.speed_mbps || 0)} Mbps)`;
+        box.classList.add("active");
+        list.classList.remove("active");
+      }
+
+      async function searchClients() {
+        const q = document.getElementById("clientSearchInput").value.trim();
+        const list = document.getElementById("clientSuggestions");
+
+        if (q.length < 2) {
+          list.classList.remove("active");
+          return;
+        }
+
+        try {
+          const data = await fetchJson(`backend/public/support/clients_search.php?q=${encodeURIComponent(q)}`);
+          renderSuggestions(data.clients || []);
+        } catch (_error) {
+          list.innerHTML = '<div class="client-item"><b>Search failed</b><span>Please retry</span></div>';
+          list.classList.add("active");
+        }
+      }
+
+      async function createTicketByStaff() {
+        const resultEl = document.getElementById("createResult");
+        const btn = document.getElementById("createTicketBtn");
+
+        const payload = {
+          client_id: selectedClient ? Number(selectedClient.id) : 0,
+          service_type: document.getElementById("serviceTypeInput").value,
+          subject: document.getElementById("subjectInput").value.trim(),
+          category: document.getElementById("categoryInput").value,
+          priority: document.getElementById("priorityInput").value,
+          description: document.getElementById("descriptionInput").value.trim(),
+          admin_remarks: document.getElementById("remarksInput").value.trim(),
+        };
+
+        const attachmentFile = document.getElementById("attachmentInput").files[0] || null;
+
+        if (!payload.client_id) {
+          resultEl.className = "create-result err";
+          resultEl.textContent = "Please search and select a valid client.";
+          return;
+        }
+
+        if (!payload.subject) {
+          resultEl.className = "create-result err";
+          resultEl.textContent = "Subject is required.";
+          return;
+        }
+
+        if (payload.description.length < 8) {
+          resultEl.className = "create-result err";
+          resultEl.textContent = "Description should be at least 8 characters.";
+          return;
+        }
+
+        btn.disabled = true;
+        btn.style.opacity = "0.75";
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Creating...';
+
+        try {
+          const formData = new FormData();
+          formData.append("client_id", String(payload.client_id));
+          formData.append("service_type", payload.service_type);
+          formData.append("subject", payload.subject);
+          formData.append("category", payload.category);
+          formData.append("priority", payload.priority);
+          formData.append("description", payload.description);
+          formData.append("admin_remarks", payload.admin_remarks);
+          if (attachmentFile) {
+            formData.append("attachment", attachmentFile);
+          }
+
+          const data = await fetchJson("backend/public/support/tickets_create_staff.php", {
+            method: "POST",
+            body: formData,
+          });
+
+          const ticketNo = data && data.ticket && data.ticket.ticket_no ? data.ticket.ticket_no : "N/A";
+          resultEl.className = "create-result ok";
+          resultEl.textContent = `Ticket ${ticketNo} created and synced successfully.`;
+
+          document.getElementById("subjectInput").value = "";
+          document.getElementById("descriptionInput").value = "";
+          document.getElementById("remarksInput").value = "";
+          document.getElementById("attachmentInput").value = "";
+          document.getElementById("priorityInput").value = "medium";
+          document.getElementById("categoryInput").value = "Technical Issue";
+
+          setTimeout(() => {
+            window.location.href = "ticket_list.html";
+          }, 900);
+        } catch (error) {
+          resultEl.className = "create-result err";
+          resultEl.textContent = error && error.message ? error.message : "Failed to create ticket.";
+        } finally {
+          btn.disabled = false;
+          btn.style.opacity = "1";
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Create Ticket';
+        }
+      }
+
+      function setupEvents() {
+        const searchInput = document.getElementById("clientSearchInput");
+        const suggestions = document.getElementById("clientSuggestions");
+
+        searchInput.addEventListener("input", () => {
+          selectedClient = null;
+          document.getElementById("selectedClientBox").classList.remove("active");
+          if (searchDebounceId) clearTimeout(searchDebounceId);
+          searchDebounceId = setTimeout(searchClients, 260);
+        });
+
+        suggestions.addEventListener("click", (event) => {
+          const item = event.target.closest(".client-item[data-client]");
+          if (!item) return;
+          try {
+            const data = JSON.parse(item.getAttribute("data-client").replace(/&#39;/g, "'"));
+            selectClient(data);
+          } catch (_error) {
+            // ignore invalid entry
+          }
+        });
+
+        document.addEventListener("click", (event) => {
+          const wrap = document.querySelector(".client-search-wrap");
+          if (!wrap.contains(event.target)) {
+            suggestions.classList.remove("active");
+          }
+        });
+
+        document.getElementById("createTicketBtn").addEventListener("click", createTicketByStaff);
+      }
+
+      setupEvents();
+    </script>
+  </body>
+</html>
+
+
+
+

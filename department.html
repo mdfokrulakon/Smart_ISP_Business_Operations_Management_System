@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="assets/css/style.css?v=20260326f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <title>Department</title>
+    <style>
+      :root {
+        --dept-ink: #0f2340;
+        --dept-ink-soft: #5a6f8d;
+        --dept-bg: #f4f8ff;
+        --dept-card: rgba(255, 255, 255, 0.82);
+        --dept-line: #d8e3f3;
+        --dept-brand: #1d4ed8;
+        --dept-brand-2: #0ea5e9;
+        --dept-accent: #14b8a6;
+        --dept-warm: #f59e0b;
+        --dept-danger: #dc2626;
+        --dept-shadow: 0 22px 50px rgba(18, 44, 88, 0.12);
+      }
+
+      body {
+        font-family: 'Manrope', sans-serif;
+        background:
+          radial-gradient(circle at 10% 10%, rgba(29, 78, 216, 0.16), transparent 28%),
+          radial-gradient(circle at 86% 12%, rgba(20, 184, 166, 0.14), transparent 30%),
+          linear-gradient(145deg, #f8fbff 0%, #eef4ff 46%, #f8fbfd 100%);
+        color: var(--dept-ink);
+      }
+
+      .page-content.department-page {
+        position: relative;
+        isolation: isolate;
+        padding: 24px 24px 34px;
+      }
+
+      .page-content.department-page::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto auto 0;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(29, 78, 216, 0.12), transparent 65%);
+        filter: blur(2px);
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .dept-shell {
+        max-width: 1520px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+        animation: deptRise 420ms ease-out;
+      }
+
+      .dept-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        border: 1px solid rgba(214, 226, 244, 0.9);
+        background:
+          linear-gradient(135deg, rgba(255,255,255,0.9), rgba(241,247,255,0.88)),
+          linear-gradient(135deg, rgba(29, 78, 216, 0.06), rgba(14, 165, 233, 0.04));
+        box-shadow: var(--dept-shadow);
+        padding: 24px;
+      }
+
+      .dept-hero::after {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: -110px;
+        top: -100px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.16), transparent 70%);
+      }
+
+      .dept-hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 14px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+      }
+
+      .dept-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 11px;
+        border-radius: 999px;
+        background: rgba(29, 78, 216, 0.09);
+        color: var(--dept-brand);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        margin-bottom: 10px;
+      }
+
+      .dept-hero h1 {
+        margin: 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(28px, 3vw, 42px);
+        color: var(--dept-ink);
+        letter-spacing: -0.03em;
+      }
+
+      .dept-hero h1 em {
+        font-style: normal;
+        color: var(--dept-brand);
+      }
+
+      .dept-hero p {
+        margin: 8px 0 0;
+        max-width: 760px;
+        color: var(--dept-ink-soft);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .dept-hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .dept-pill-btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      }
+
+      .dept-pill-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .dept-pill-btn.primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--dept-brand), var(--dept-brand-2));
+        box-shadow: 0 12px 20px rgba(29, 78, 216, 0.22);
+      }
+
+      .dept-pill-btn.secondary {
+        color: var(--dept-ink);
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid var(--dept-line);
+      }
+
+      .dept-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .metric-card {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(214, 226, 244, 0.9);
+        border-radius: 18px;
+        padding: 14px;
+        box-shadow: 0 10px 22px rgba(17, 40, 72, 0.06);
+      }
+
+      .metric-card .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--dept-ink-soft);
+        font-weight: 800;
+      }
+
+      .metric-card .value {
+        margin-top: 8px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 24px;
+        color: var(--dept-ink);
+        line-height: 1;
+      }
+
+      .metric-card .sub {
+        margin-top: 4px;
+        color: var(--dept-ink-soft);
+        font-size: 12px;
+      }
+
+      .dept-panel {
+        background: rgba(255, 255, 255, 0.84);
+        border: 1px solid rgba(214, 226, 244, 0.9);
+        border-radius: 24px;
+        box-shadow: var(--dept-shadow);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+      }
+
+      .dept-panel-head {
+        padding: 18px 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 12px;
+        border-bottom: 1px solid rgba(214, 226, 244, 0.85);
+        background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(247,250,255,0.88));
+      }
+
+      .dept-panel-head h2 {
+        margin: 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 20px;
+        color: var(--dept-ink);
+      }
+
+      .dept-panel-head p {
+        margin: 5px 0 0;
+        color: var(--dept-ink-soft);
+        font-size: 13px;
+      }
+
+      .dept-form {
+        padding: 18px 22px 10px;
+      }
+
+      .dept-form-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .dept-input-wrap {
+        position: relative;
+      }
+
+      #deptInput {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 14px;
+        border: 1px solid var(--dept-line);
+        background: #f8fbff;
+        padding: 0 16px 0 42px;
+        font-size: 14px;
+        color: var(--dept-ink);
+        outline: none;
+        transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+      }
+
+      #deptInput::placeholder {
+        color: #97a8bf;
+      }
+
+      #deptInput:focus {
+        border-color: rgba(29, 78, 216, 0.45);
+        box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.08);
+        transform: translateY(-1px);
+      }
+
+      .dept-input-wrap i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #7f91aa;
+      }
+
+      .dept-submit {
+        min-height: 48px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 14px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--dept-brand), var(--dept-brand-2));
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(29, 78, 216, 0.2);
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      .dept-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 28px rgba(29, 78, 216, 0.25);
+      }
+
+      .dept-table-wrap {
+        padding: 6px 22px 22px;
+      }
+
+      .dept-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+      }
+
+      .dept-table thead th {
+        text-align: left;
+        color: var(--dept-ink-soft);
+        font-size: 11px;
+        letter-spacing: 0.55px;
+        text-transform: uppercase;
+        padding: 0 14px 8px;
+      }
+
+      .dept-table tbody tr {
+        background: rgba(248, 251, 255, 0.95);
+        box-shadow: 0 10px 18px rgba(17, 40, 72, 0.04);
+        transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      }
+
+      .dept-table tbody tr:hover {
+        transform: translateY(-1px);
+        background: #ffffff;
+        box-shadow: 0 16px 28px rgba(17, 40, 72, 0.08);
+      }
+
+      .dept-table tbody td {
+        padding: 14px;
+        border-top: 1px solid rgba(214, 226, 244, 0.8);
+        border-bottom: 1px solid rgba(214, 226, 244, 0.8);
+      }
+
+      .dept-table tbody td:first-child {
+        border-left: 1px solid rgba(214, 226, 244, 0.8);
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+      }
+
+      .dept-table tbody td:last-child {
+        border-right: 1px solid rgba(214, 226, 244, 0.8);
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+      }
+
+      .dept-name-cell {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        color: var(--dept-ink);
+      }
+
+      .dept-bullet {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--dept-brand), var(--dept-brand-2));
+        box-shadow: 0 0 0 6px rgba(29, 78, 216, 0.1);
+        flex-shrink: 0;
+      }
+
+      .dept-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 52px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(20, 184, 166, 0.12);
+        color: #0f766e;
+        font-weight: 800;
+      }
+
+      .dept-actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .dept-action {
+        border: 0;
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #fff;
+        cursor: pointer;
+        transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+      }
+
+      .dept-action:hover {
+        transform: translateY(-1px);
+        opacity: 0.96;
+      }
+
+      .dept-action.edit {
+        background: linear-gradient(135deg, #2563eb, #0ea5e9);
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+      }
+
+      .dept-action.delete {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        box-shadow: 0 10px 20px rgba(220, 38, 38, 0.18);
+      }
+
+      .dept-empty {
+        text-align: center;
+        color: var(--dept-ink-soft);
+        padding: 24px 0 8px;
+      }
+
+      @keyframes deptRise {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .page-content.department-page {
+          padding: 18px;
+        }
+
+        .dept-metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dept-form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .dept-metrics {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-header"></div>
+<!-- Main Content Area -->
+    <div class="main-content">
+<div class="page-content department-page">
+        <div class="dept-shell">
+          <section class="dept-hero">
+            <div class="dept-hero-top">
+              <div>
+                <div class="dept-eyebrow"><i class="fa-solid fa-sitemap"></i> HR Foundation</div>
+                <h1>Department <em>Studio</em></h1>
+                <p>Create, edit, and manage departments with a clean operational view, live employee counts, and permission-aware controls for each role.</p>
+              </div>
+              <div class="dept-hero-actions">
+                <button type="button" class="dept-pill-btn secondary" onclick="document.getElementById('deptInput').focus()"><i class="fa-solid fa-bolt"></i> Quick Add</button>
+                <button type="button" class="dept-pill-btn primary" onclick="document.getElementById('deptInput').focus()"><i class="fa-solid fa-plus"></i> New Department</button>
+              </div>
+            </div>
+
+            <div class="dept-metrics">
+              <div class="metric-card">
+                <div class="label">Departments</div>
+                <div class="value" id="deptSummaryTotal">0</div>
+                <div class="sub">Active units in the system</div>
+              </div>
+              <div class="metric-card">
+                <div class="label">Employees Mapped</div>
+                <div class="value" id="deptSummaryEmployees">0</div>
+                <div class="sub">Linked to all departments</div>
+              </div>
+              <div class="metric-card">
+                <div class="label">Empty Departments</div>
+                <div class="value" id="deptSummaryEmpty">0</div>
+                <div class="sub">Require assignment review</div>
+              </div>
+              <div class="metric-card">
+                <div class="label">Control Mode</div>
+                <div class="value" id="deptSummaryAccess">View only</div>
+                <div class="sub">Permission-based editing</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="dept-panel">
+            <div class="dept-panel-head">
+              <div>
+                <h2>Department Directory</h2>
+                <p>Organize your operational structure and keep HR department records consistent.</p>
+              </div>
+            </div>
+
+            <form id="departmentForm" class="dept-form">
+              <div class="dept-form-row">
+                <div class="dept-input-wrap">
+                  <i class="fa-solid fa-building-user"></i>
+                  <input id="deptInput" placeholder="Enter a department name" required />
+                </div>
+                <button type="submit" class="dept-submit">Add Department</button>
+              </div>
+            </form>
+
+            <div class="dept-table-wrap">
+              <table class="dept-table">
+                <thead>
+                  <tr>
+                    <th>Department Name</th>
+                    <th style="text-align:center;">No. of Employees</th>
+                    <th id="deptActionHead" style="display:none; text-align:center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="deptTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script src="assets/js/header-loader.js?v=20260328i"></script>
+    <script>
+      const departmentForm = document.getElementById('departmentForm');
+      const deptInput = document.getElementById('deptInput');
+      const deptTable = document.getElementById('deptTable');
+      const deptActionHead = document.getElementById('deptActionHead');
+      const deptSummaryTotal = document.getElementById('deptSummaryTotal');
+      const deptSummaryEmployees = document.getElementById('deptSummaryEmployees');
+      const deptSummaryEmpty = document.getElementById('deptSummaryEmpty');
+      const deptSummaryAccess = document.getElementById('deptSummaryAccess');
+      let departmentsState = [];
+      let canEditDepartments = false;
+
+      function getDepartments() {
+        return departmentsState
+          .map((item) => {
+            if (typeof item === 'string') {
+              return { id: 0, name: item.trim(), employee_count: 0 };
+            }
+            if (item && typeof item === 'object') {
+              return {
+                id: Number(item.id || 0),
+                name: (item.name || '').toString().trim(),
+                employee_count: Number(item.employee_count || 0)
+              };
+            }
+            return { id: 0, name: '', employee_count: 0 };
+          })
+          .filter((item) => item.name);
+      }
+
+      function saveDepartments(list) {
+        departmentsState = Array.from(
+          new Map(list.map((item) => [item.name.toLowerCase(), item])).values()
+        );
+      }
+
+      async function loadCurrentUserPermissions() {
+        try {
+          const response = await fetch('backend/public/auth/me.php', {
+            method: 'GET',
+            credentials: 'same-origin',
+            cache: 'no-store'
+          });
+          const result = await response.json().catch(() => null);
+          const permissions = result && result.user && result.user.module_permissions && typeof result.user.module_permissions === 'object'
+            ? result.user.module_permissions
+            : {};
+          canEditDepartments = String(permissions.Department || '').toLowerCase() === 'full';
+          deptActionHead.style.display = canEditDepartments ? '' : 'none';
+        } catch (_error) {
+          canEditDepartments = false;
+          deptActionHead.style.display = 'none';
+        }
+      }
+
+      async function syncDepartmentsFromDb() {
+        try {
+          const response = await fetch('backend/public/employees/list_departments_department.php', {
+            method: 'GET',
+            credentials: 'same-origin',
+            cache: 'no-store'
+          });
+          const result = await response.json().catch(() => null);
+          if (!response.ok || !result || result.ok === false) {
+            return;
+          }
+
+          const dbDepartments = Array.isArray(result.departments)
+            ? result.departments.map((item) => ({
+                id: Number(item && item.id ? item.id : 0),
+                name: (item && item.name ? String(item.name) : '').trim(),
+                employee_count: Number(item && item.employee_count ? item.employee_count : 0)
+              })).filter((item) => item.name)
+            : [];
+
+          saveDepartments(dbDepartments);
+          renderDepartments();
+        } catch (_error) {
+          // Keep in-memory data if DB sync fails.
+        }
+      }
+
+      function updateDepartmentSummary(departments) {
+        const list = Array.isArray(departments) ? departments : [];
+        const totalDepartments = list.length;
+        const totalEmployees = list.reduce((sum, item) => sum + Number(item.employee_count || 0), 0);
+        const emptyDepartments = list.filter((item) => Number(item.employee_count || 0) === 0).length;
+
+        deptSummaryTotal.textContent = String(totalDepartments);
+        deptSummaryEmployees.textContent = String(totalEmployees);
+        deptSummaryEmpty.textContent = String(emptyDepartments);
+        deptSummaryAccess.textContent = canEditDepartments ? 'Editable' : 'View only';
+      }
+
+      async function saveDepartmentToDb(name) {
+        const response = await fetch('backend/public/employees/upsert_department.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            department_name: name
+          })
+        });
+
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result || result.ok === false) {
+          throw new Error((result && result.message) || 'Failed to save department to database.');
+        }
+      }
+
+      async function updateDepartmentToDb(departmentId, newName) {
+        const response = await fetch('backend/public/employees/update_department.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            department_id: departmentId,
+            new_department_name: newName
+          })
+        });
+
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result || result.ok === false) {
+          throw new Error((result && result.message) || 'Failed to update department.');
+        }
+      }
+
+      async function deleteDepartmentToDb(departmentId) {
+        const response = await fetch('backend/public/employees/delete_department.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            department_id: departmentId
+          })
+        });
+
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result || result.ok === false) {
+          throw new Error((result && result.message) || 'Failed to delete department.');
+        }
+      }
+
+      function renderDepartments() {
+        const departments = getDepartments();
+        updateDepartmentSummary(departments);
+        deptTable.innerHTML = '';
+
+        if (!departments.length) {
+          deptTable.innerHTML = `<tr><td colspan="${canEditDepartments ? 3 : 2}" class="dept-empty">No departments found.</td></tr>`;
+          return;
+        }
+
+        departments.forEach((dept) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><span class="dept-name-cell"><span class="dept-bullet"></span>${dept.name}</span></td>
+            <td style="text-align:center;"><span class="dept-count">${Number(dept.employee_count || 0)}</span></td>
+            ${canEditDepartments ? `<td style="text-align:center;">
+              <div class="dept-actions">
+                <button type="button" class="dept-action edit" data-action="edit" data-id="${dept.id}" data-name="${dept.name}"><i class="fa-solid fa-pen"></i> Edit</button>
+                <button type="button" class="dept-action delete" data-action="delete" data-id="${dept.id}" data-name="${dept.name}"><i class="fa-solid fa-trash"></i> Delete</button>
+              </div>
+            </td>` : ''}
+          `;
+          deptTable.appendChild(row);
+        });
+      }
+
+      departmentForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const deptName = (deptInput.value || '').trim();
+        if (!deptName) return;
+
+        try {
+          await saveDepartmentToDb(deptName);
+          await syncDepartmentsFromDb();
+        } catch (error) {
+          alert(error.message);
+          return;
+        }
+
+        deptInput.value = '';
+      });
+
+      deptTable.addEventListener('click', async function (event) {
+        const button = event.target.closest('button[data-action]');
+        if (!button || !canEditDepartments) return;
+
+        const action = button.getAttribute('data-action');
+        const departmentId = Number(button.getAttribute('data-id') || 0);
+        const currentName = button.getAttribute('data-name') || '';
+        if (!departmentId || !currentName) return;
+
+        if (action === 'edit') {
+          const newName = window.prompt('Update department name', currentName);
+          const trimmedName = (newName || '').trim();
+          if (!trimmedName || trimmedName === currentName) return;
+
+          try {
+            await updateDepartmentToDb(departmentId, trimmedName);
+            await syncDepartmentsFromDb();
+          } catch (error) {
+            alert(error.message);
+          }
+          return;
+        }
+
+        if (action === 'delete') {
+          if (!window.confirm(`Delete department "${currentName}" and all related employee records?`)) {
+            return;
+          }
+
+          try {
+            await deleteDepartmentToDb(departmentId);
+            await syncDepartmentsFromDb();
+          } catch (error) {
+            alert(error.message);
+          }
+        }
+      });
+
+      // Initialize
+      Promise.all([loadCurrentUserPermissions(), syncDepartmentsFromDb()]).then(() => renderDepartments());
+    </script>
+  </body>
+</html>
+
+
+
+
